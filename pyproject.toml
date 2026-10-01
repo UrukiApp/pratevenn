@@ -1,6 +1,6 @@
 [project]
 name = "pratevenn"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 description = "A local conversational AI tool for Norwegian language learners"
 readme = "README.md"
 license = { text = "MIT" }
