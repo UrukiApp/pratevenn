@@ -31,7 +31,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 The diagram below shows the architecture of Pratevenn and its components.
 
 <div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="70%">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="75%">
 </div>
 
 ---
