@@ -34,14 +34,6 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 > Pratevenn is in early development, so bugs and breaking changes are expected.
 > Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
 
-### How It Works
-
-The diagram below shows the architecture of Pratevenn and its components in detail.
-
-<div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
-</div>
-
 ---
 
 ### Getting Started
@@ -125,7 +117,7 @@ the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/c
 
 Open <http://localhost:8000> in your browser and click *Start conversation*.
 
-#### Managing Containers
+#### Managing Pratevenn Container
 
 Use standard Docker Compose commands to manage Pratevenn:
 
@@ -136,6 +128,16 @@ docker compose down                     # Remove containers
 docker compose down -v                  # Remove containers (and downloaded models)
 docker compose logs -f                  # Check the logs
 ```
+
+---
+
+### How It Works
+
+The diagram below shows the architecture of Pratevenn and its components in detail.
+
+<div align="center">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
+</div>
 
 ---
 
