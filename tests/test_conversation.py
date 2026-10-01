@@ -5,11 +5,13 @@ import io
 import json
 import struct
 import threading
+import tomllib
 import wave
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from packaging.version import Version
 from starlette.websockets import WebSocketDisconnect
 
 from pratevenn.app import MAX_MESSAGE_BYTES, create_app, parse_turn
@@ -146,7 +148,10 @@ def test_websocket_history_errors_and_cancellation():
         assert client.get("/static/style.css").status_code == 200
         assert client.get("/static/app.js").status_code == 200
         assert client.get("/static/capture.js").status_code == 200
-        assert client.get("/api/status").json()["ready"]
+        info = client.get("/api/status").json()
+        assert info["ready"]
+        project = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
+        assert Version(info["version"]) == Version(project["project"]["version"])
         assert client.get("/", headers={"Host": "evil.example"}).status_code == 400
     with TestClient(create_app(models, allowed_hosts=["*"]), base_url="http://127.0.0.1") as client:
         assert client.get("/", headers={"Host": "custom.domain.example"}).status_code == 200

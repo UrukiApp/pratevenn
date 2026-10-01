@@ -670,6 +670,7 @@ fetch("/api/status").then((response) => {
   if (!response.ok) throw new Error("The local server is not ready.");
   return response.json();
 }).then((info) => {
+  $("version").textContent = `Pratevenn v${info.version} · `;
   initialized = true;
   maxChatMessages = info.max_chat_messages;
   $("systemPrompt").value = info.system_prompt;
