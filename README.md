@@ -20,7 +20,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 
 <br>
 <div align="center">
-  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="80%">
+  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
 </div>
 
 ### Key Features
