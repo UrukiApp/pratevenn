@@ -15,6 +15,7 @@ MESSAGES = [
     {"role": "assistant", "content": "Hei!", "source": "text"},
 ]
 STATUS = {
+    "version": "0.1.0a3",
     "models": {kind: [{"id": kind, "label": kind}] for kind in ("stt", "llm", "tts")},
     "selected": {kind: kind for kind in ("stt", "llm", "tts")},
     "llm_device": "CPU",
@@ -215,6 +216,7 @@ def main() -> None:
         held.pop("/api/status").fulfill(json=STATUS)
         delays.clear()
         expect(page.locator("#start")).to_be_enabled()
+        expect(page.locator("#version")).to_have_text("Pratevenn v0.1.0a2 · ")
         expect(page.locator("#showInlineFeedback")).to_be_checked()
         expect(page.locator("#sttModel")).to_have_value("stt-alternative")
         expect(page.locator("#contextSize")).to_have_value("8192")

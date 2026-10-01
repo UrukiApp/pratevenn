@@ -24,6 +24,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from pratevenn import __version__
 from pratevenn.history import MAX_CHAT_BYTES, MAX_CHAT_MESSAGES, ChatStore, validate_messages
 from pratevenn.models import (
     MAX_AUDIO_BYTES,
@@ -98,6 +99,7 @@ def create_app(
     async def status() -> dict[str, Any]:
         return {
             "ready": True,
+            "version": __version__,
             **models.options(),
             "system_prompt": SYSTEM_PROMPT,
             "max_system_prompt_chars": MAX_SYSTEM_PROMPT_CHARS,

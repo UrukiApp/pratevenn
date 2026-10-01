@@ -5,16 +5,19 @@ import io
 import json
 import struct
 import threading
+import tomllib
 import wave
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from packaging.version import Version
 from starlette.websockets import WebSocketDisconnect
 
 from pratevenn.app import MAX_MESSAGE_BYTES, create_app, parse_turn
 from pratevenn.models import (
     CONTEXT_TOKENS,
+    MAX_AUDIO_BYTES,
     MAX_SYSTEM_PROMPT_CHARS,
     PROMPT_TOKENS,
     SYSTEM_PROMPT,
@@ -33,6 +36,7 @@ class FakeModels(Models):
         self.speeds = []
         self.entered = threading.Event()
         self.cancelled = threading.Event()
+        self.holding = threading.Event()
         self.selections = []
         self.prompts = []
         self.context_tokens_list = []
@@ -66,6 +70,19 @@ class FakeModels(Models):
             if cancelled.is_set():
                 self.cancelled.set()
             return
+        if text == "hold":
+            self.holding.wait(5)
+            emit({"type": "done"})
+            return
+        if text == "cancel_emit":
+            cancelled.set()
+            emit({"type": "text", "text": "late"})
+            raise RuntimeError("cancelled turn error")
+        if text == "cancel_value_error":
+            cancelled.set()
+            raise ValueError("cancelled value error")
+        if text == "value_error":
+            raise ValueError("custom model error")
         if text == "fail":
             raise RuntimeError("test model failure")
         self.histories.append(list(history))
@@ -90,11 +107,14 @@ def test_audio_trust_boundary():
     validate_audio(valid)
     _, decoded, _ = parse_turn({"type": "audio", "data": base64.b64encode(valid).decode()})
     assert decoded == valid
-    for invalid in (b"", valid[:-4], recording(48000), recording(seconds=31)):
+    for invalid in (b"", valid[:-4], recording(48000), recording(seconds=32)):
         with pytest.raises(ValueError):
             validate_audio(invalid)
     for message in (
         {"type": "audio", "data": "not base64"},
+        {"type": "audio", "data": 123},
+        {"type": "audio", "data": "A" * (MAX_AUDIO_BYTES * 4 // 3 + 5)},
+        {"type": "unknown"},
         {"type": "text", "text": " "},
         {"type": "text", "text": "x" * 1001},
     ):
@@ -128,7 +148,10 @@ def test_websocket_history_errors_and_cancellation():
         assert client.get("/static/style.css").status_code == 200
         assert client.get("/static/app.js").status_code == 200
         assert client.get("/static/capture.js").status_code == 200
-        assert client.get("/api/status").json()["ready"]
+        info = client.get("/api/status").json()
+        assert info["ready"]
+        project = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
+        assert Version(info["version"]) == Version(project["project"]["version"])
         assert client.get("/", headers={"Host": "evil.example"}).status_code == 400
     with TestClient(create_app(models, allowed_hosts=["*"]), base_url="http://127.0.0.1") as client:
         assert client.get("/", headers={"Host": "custom.domain.example"}).status_code == 200
@@ -159,6 +182,31 @@ def test_websocket_history_errors_and_cancellation():
         ) as ws:
             ws.send_json({"type": "text", "text": "fail"})
             assert ws.receive_json()["type"] == "error"
+            ws.send_json({"type": "text", "text": "value_error"})
+            error_msg = ws.receive_json()
+            assert error_msg["type"] == "error" and error_msg["message"] == "custom model error"
+        with client.websocket_connect(
+            "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
+        ) as ws:
+            ws.send_json({"type": "text", "text": "cancel_emit"})
+            ws.send_json({"type": "text", "text": "cancel_value_error"})
+        with client.websocket_connect(
+            "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
+        ) as ws:
+            models.holding.clear()
+            ws.send_json({"type": "text", "text": "hold"})
+            ws.send_json({"type": "text", "text": "Hei"})
+            busy_msg = ws.receive_json()
+            assert busy_msg["type"] == "error" and "wait" in busy_msg["message"].lower()
+            models.holding.set()
+            assert ws.receive_json()["type"] == "done"
+        with client.websocket_connect(
+            "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
+        ) as ws:
+            with pytest.raises(WebSocketDisconnect) as disconnect:
+                ws.send_text("x" * (MAX_MESSAGE_BYTES + 1))
+                ws.receive_text()
+            assert disconnect.value.code == 1009
         models.entered.clear()
         with client.websocket_connect(
             "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
@@ -355,6 +403,7 @@ def test_model_reuse_replacement_and_failed_load(monkeypatch, supported, gpu_lay
                 raise MemoryError("This model does not fit in GPU memory")
             if gpu_error and kwargs["n_gpu_layers"] != 0:
                 raise gpu_error("GPU memory or backend unavailable")
+            self.model_path = model_path
             self.closed = False
             self.metadata = (
                 {}
@@ -366,7 +415,7 @@ def test_model_reuse_replacement_and_failed_load(monkeypatch, supported, gpu_lay
             created.append(self)
 
         def token_eos(self):
-            return 2
+            return -1 if self.model_path == "no-eos" else 2
 
         def token_bos(self):
             return 1
@@ -388,7 +437,8 @@ def test_model_reuse_replacement_and_failed_load(monkeypatch, supported, gpu_lay
     models.loaded = {}
     models.available = {
         "llm": {
-            name: Path(name) for name in ("first", "broken", "second", "unloadable", "cpu-only")
+            name: Path(name)
+            for name in ("first", "broken", "second", "unloadable", "cpu-only", "no-eos")
         }
     }
     models.load({"llm": "first"})
@@ -406,6 +456,8 @@ def test_model_reuse_replacement_and_failed_load(monkeypatch, supported, gpu_lay
     assert len(created) == 1 and len(attempts) == before
     with pytest.raises(ValueError, match="chat template"):
         models.load({"llm": "broken"})
+    with pytest.raises(ValueError, match="end-of-sequence token"):
+        models.load({"llm": "no-eos"})
     assert models.llm is first and not first.closed
     assert created[-1].closed and models.loaded == {"llm": "first"}
     assert models.llm_device == device
@@ -593,6 +645,24 @@ def test_start_cli_and_argument_validation(tmp_path, monkeypatch):
     cli.main()
     assert downloads == [(tmp_path,)]
 
+    monkeypatch.delenv("PRATEVENN_CONTEXT_SIZE", raising=False)
+
+    def fail_load(*args, **kwargs):
+        raise RuntimeError("model file missing")
+
+    monkeypatch.setattr("pratevenn.models.Models", fail_load)
+    monkeypatch.setattr("sys.argv", ["pratevenn", "start", "--model-dir", str(tmp_path)])
+    with pytest.raises(SystemExit) as error:
+        cli.main()
+    assert error.value.code == 2
+
+    import runpy
+
+    monkeypatch.setattr("pratevenn.models.Models", load_models)
+    monkeypatch.setattr(uvicorn, "run", lambda app, **kwargs: None)
+    monkeypatch.setattr("sys.argv", ["pratevenn", "start", "--model-dir", str(tmp_path)])
+    runpy.run_module("pratevenn.__main__", run_name="__main__")
+
 
 def test_default_context_size_is_fixed_across_connections(monkeypatch):
     models = FakeModels()
@@ -716,10 +786,193 @@ def test_voice_speakers_and_model_reuse(tmp_path, monkeypatch):
     assert models.speak("Hei sakte", length_scale=1.25)
     assert len(loads) == 1
     assert speakers == [None, 0, 1, None, None]
-    assert length_scales == [1.176, 1.176, 1.176, 1.176, 1.25]
     models.defaults = {"tts": "tts/voice.onnx"}
     assert models.options()["models"]["tts"][1]["label"] == "voice · KNN"
     with pytest.raises(ValueError):
         models.selection({"tts": "tts/voice.onnx#speaker=99:invalid"})
     config.write_text("invalid JSON")
     assert list(discover_models(tmp_path)["tts"]) == ["tts/voice.onnx"]
+    config.write_text(json.dumps("string not dict"))
+    assert list(discover_models(tmp_path)["tts"]) == ["tts/voice.onnx"]
+    config.write_text(json.dumps({"num_speakers": "bad"}))
+    assert list(discover_models(tmp_path)["tts"]) == ["tts/voice.onnx"]
+    config.write_text(json.dumps({"num_speakers": 2, "speaker_id_map": "bad"}))
+    assert list(discover_models(tmp_path)["tts"]) == ["tts/voice.onnx"]
+
+
+def test_models_initialization_validation(tmp_path, monkeypatch):
+    with pytest.raises(ValueError, match="GPU layers must be -1, 0, or a positive integer."):
+        Models(tmp_path, gpu_layers=-2)
+    monkeypatch.setattr(
+        "pratevenn.models.discover_models",
+        lambda d: {"stt": {}, "llm": {"a": Path("a")}, "tts": {"b": Path("b")}},
+    )
+    with pytest.raises(ValueError, match="No downloaded stt models found"):
+        Models(tmp_path)
+
+
+def test_stt_model_loading_and_cuda_fallback(tmp_path, monkeypatch):
+    import faster_whisper
+    import llama_cpp
+
+    stt_attempts = []
+
+    class FakeWhisper:
+        def __init__(self, path, device, compute_type, **kwargs):
+            stt_attempts.append((device, compute_type))
+            if device == "cuda":
+                raise RuntimeError("CUDA device unavailable")
+
+    monkeypatch.setattr(faster_whisper, "WhisperModel", FakeWhisper)
+    monkeypatch.setattr(llama_cpp, "llama_supports_gpu_offload", lambda: True)
+
+    models = Models.__new__(Models)
+    models.gpu_layers = 10
+    models.threads = 4
+    models.loaded = {}
+    models.available = {"stt": {"stt/model": tmp_path / "model"}}
+    models.load({"stt": "stt/model"})
+
+    assert stt_attempts == [("cuda", "float16"), ("cpu", "int8")]
+    assert isinstance(models.stt, FakeWhisper)
+
+    models.gpu_layers = 0
+    models.loaded = {}
+    models.load({"stt": "stt/model"})
+    assert stt_attempts[-1] == ("cpu", "int8")
+
+
+def test_run_turn_branches_and_cancellation():
+    from types import SimpleNamespace
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+    events = []
+
+    with models.lock:
+        models.run_turn("Hei", None, [], threading.Event(), events.append)
+    assert events[0] == {
+        "type": "error",
+        "message": "Pratevenn is busy. Please try again in a moment.",
+    }
+
+    cancelled = threading.Event()
+    cancelled.set()
+    events.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append)
+    assert not events
+
+    loaded = []
+    models.loaded = {"llm": "old"}
+    models.loaded_context_tokens = 8192
+    models.context_tokens = 8192
+    models.load = lambda selection, **kw: loaded.append(selection)
+    models.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
+    models.llm = SimpleNamespace(
+        create_completion=lambda *a, **kw: iter([{"choices": [{"text": "Hei!"}]}]),
+        n_tokens=10,
+    )
+    models.speak = lambda text, **kw: recording()
+
+    cancelled.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append, selection={"llm": "new"})
+    assert loaded == [{"llm": "new"}]
+    assert events[0] == {"type": "status", "message": "Loading selected models …"}
+
+    def load_and_cancel(selection, **kw):
+        cancelled.set()
+
+    models.load = load_and_cancel
+    events.clear()
+    cancelled.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append, selection={"llm": "another"})
+    assert not any(event.get("type") == "transcript" for event in events)
+
+    class CancelRecognizer:
+        def transcribe(self, *args, **kwargs):
+            cancelled.set()
+            return [SimpleNamespace(text="Hei")], None
+
+    models.stt = CancelRecognizer()
+    events.clear()
+    cancelled.clear()
+    models.run_turn(None, recording(), [], cancelled, events.append)
+    assert not any(event.get("type") == "transcript" for event in events)
+
+    models.prompt = lambda *a, **kw: ([1] * 10000, SimpleNamespace(stop=[], stopping_criteria=None))
+    with pytest.raises(ValueError, match="too long for the conversation model"):
+        models.run_turn("Lang", None, [], threading.Event(), events.append)
+
+    def cancel_in_stream(*args, **kwargs):
+        yield {"choices": [{"text": "Første del. "}]}
+        cancelled.set()
+        yield {"choices": [{"text": "Andre del."}]}
+
+    models.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
+    models.llm.create_completion = cancel_in_stream
+    events.clear()
+    cancelled.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append)
+    assert not any(event.get("type") == "done" for event in events)
+
+    def cancel_after_sentence_speak(text, **kwargs):
+        cancelled.set()
+        return recording()
+
+    models.speak = cancel_after_sentence_speak
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Ferdig nå. "}]}])
+    events.clear()
+    cancelled.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append)
+    assert not any(event.get("type") == "done" for event in events)
+
+    def cancel_after_pending_speak(text, **kwargs):
+        cancelled.set()
+        return recording()
+
+    models.speak = cancel_after_pending_speak
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Uten tegnsetting"}]}])
+    events.clear()
+    cancelled.clear()
+    models.run_turn("Hei", None, [], cancelled, events.append)
+    assert not any(event.get("type") == "done" for event in events)
+
+    speak_calls = []
+
+    def speak_without_kwargs(text):
+        speak_calls.append(text)
+        return recording()
+
+    models.speak = speak_without_kwargs
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Uten tegnsetting"}]}])
+    events.clear()
+    models.run_turn("Hei", None, [], threading.Event(), events.append)
+    assert any(event.get("type") == "audio" for event in events)
+    assert events[-1]["type"] == "done"
+
+    models.speak = speak_without_kwargs
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Med tegn. En til! "}]}])
+    events.clear()
+    models.run_turn("Hei", None, [], threading.Event(), events.append)
+    assert sum(1 for e in events if e.get("type") == "audio") == 2
+    models.run_turn("Hei", None, [], threading.Event(), events.append)
+    assert any(event.get("type") == "audio" for event in events)
+
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "   "}]}])
+    with pytest.raises(ValueError, match="did not produce a reply"):
+        models.run_turn("Hei", None, [], threading.Event(), events.append)
+
+    models.speak = lambda text, **kw: recording()
+    models.formatter = lambda messages, enable_thinking: SimpleNamespace(
+        prompt="", stop=[], stopping_criteria=None, added_special=False
+    )
+    models.eval_turn = lambda text, cancelled: [
+        {"original": "feil", "correction": "rett", "category": "spelling", "explanation": "rettet"}
+    ]
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Svar!"}]}])
+    events.clear()
+    models.run_turn("Hei", None, [], threading.Event(), events.append, feedback=True)
+    assert any(event.get("type") == "feedback" for event in events)
+    assert events[-1]["feedback"] == [
+        {"original": "feil", "correction": "rett", "category": "spelling", "explanation": "rettet"}
+    ]

@@ -10,7 +10,7 @@ on:
       - 'Dockerfile*'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'docker-compose*.yaml'
+      - 'compose*.yaml'
       - '.github/workflows/docker.yml'
   push:
     tags:

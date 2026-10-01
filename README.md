@@ -26,12 +26,16 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 - Shows grammar tips as you chat and lets you review your mistakes
 - Supports both CPU and NVIDIA GPUs (for faster replies)
 
+> [!IMPORTANT]
+> Pratevenn is in early development, so bugs and breaking changes are expected.
+> Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
+
 ### How It Works
 
-The diagram below shows the architecture of Pratevenn and its components.
+The diagram below shows the architecture of Pratevenn and its components in detail.
 
 <div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="75%">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
 </div>
 
 ---
@@ -42,56 +46,59 @@ The diagram below shows the architecture of Pratevenn and its components.
 
 ##### 1. Compose Configuration
 
-Use the included [docker-compose.yaml](docker-compose.yaml), or save the text below as `docker-compose.yml`:
+Use the included [compose.yaml](compose.yaml), or save the text below as `compose.yaml`:
 
 ```yaml
 services:
-  pratevenn:
-    image: ghcr.io/urukiapp/pratevenn:latest-cpu
-    environment:
-      - PRATEVENN_MODEL_DIR=/models
-      - PRATEVENN_HOST=0.0.0.0
-      - PRATEVENN_ALLOWED_HOSTS=*
-    ports:
-      - "8000:8000"
-    volumes:
-      - models:/models
-    restart: unless-stopped
+    pratevenn:
+        image: ghcr.io/urukiapp/pratevenn:latest-cpu
+        environment:
+            - PRATEVENN_MODEL_DIR=/models
+            - PRATEVENN_HOST=0.0.0.0
+            - PRATEVENN_ALLOWED_HOSTS=*
+        ports:
+            - "8000:8000"
+        volumes:
+            - models:/models
+        restart: unless-stopped
 
-  pratevenn-cuda:
-    image: ghcr.io/urukiapp/pratevenn:latest-cuda
-    environment:
-      - PRATEVENN_MODEL_DIR=/models
-      - PRATEVENN_HOST=0.0.0.0
-      - PRATEVENN_ALLOWED_HOSTS=*
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    ports:
-      - "8000:8000"
-    volumes:
-      - models:/models
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    profiles:
-      - cuda
-    restart: unless-stopped
+    pratevenn-cuda:
+        image: ghcr.io/urukiapp/pratevenn:latest-cuda
+        environment:
+            - PRATEVENN_MODEL_DIR=/models
+            - PRATEVENN_HOST=0.0.0.0
+            - PRATEVENN_ALLOWED_HOSTS=*
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        ports:
+            - "8000:8000"
+        volumes:
+            - models:/models
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        -   driver: nvidia
+                            count: all
+                            capabilities: [ gpu ]
+        profiles:
+            - cuda
+        restart: unless-stopped
 
 volumes:
-  models:
+    models:
 ```
 
 ##### 2. Download the Models
 
-Download the default models before starting the container:
+Download all the models before starting the container:
 
 ```sh
-docker compose run --rm pratevenn setup
+docker compose run --rm pratevenn setup --full
 ```
+
+You only need to do this one time, at the start.
+It also may take a while, depending on your internet speed.
 
 ##### 3. Start Pratevenn
 
@@ -106,6 +113,11 @@ If you have an NVIDIA GPU on your machine, start the CUDA version instead:
 ```sh
 docker compose --profile cuda up -d pratevenn-cuda
 ```
+
+> [!IMPORTANT]
+> Using the CUDA image is the recommended way of running Pratevenn.
+> Note that normally on Linux you need to have
+the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed.
 
 Open <http://localhost:8000> in your browser and click *Start conversation*.
 
@@ -129,12 +141,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute.
 
 ### Acknowledgments
 
-Pratevenn uses the following open-source projects and models for its core functionality:
+The logo is generated with the help of [ChatGPT](https://chatgpt.com/).
+
+Additionally, Pratevenn uses the following open-source projects and models for its core functionality:
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
 - [Gemma models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and GPU.
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and
+  GPU.
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.
 
 ### License

@@ -73,7 +73,7 @@ publish: build ## Build and publish to PyPI (needs UV_PUBLISH_TOKEN)
 	$(UV) publish
 
 # Containers
-COMPOSE     ?= $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+COMPOSE     ?= docker compose
 
 .PHONY: docker-build-cpu
 docker-build-cpu: ## Build the CPU Docker image
