@@ -39,7 +39,7 @@ def main() -> None:
     start.add_argument(
         "--context-size",
         type=int,
-        default=int(os.environ.get("PRATEVENN_CONTEXT_SIZE", "8192")),
+        default=os.environ.get("PRATEVENN_CONTEXT_SIZE", "8192"),
         help="LLM context window size in tokens (default: 8192)",
     )
     start.add_argument(

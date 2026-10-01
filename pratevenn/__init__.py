@@ -1,3 +1,8 @@
 """Local Norwegian conversation practice."""
 
-__version__ = "0.1.0-alpha.1"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("pratevenn")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "0.0.0"

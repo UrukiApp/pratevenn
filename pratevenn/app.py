@@ -85,6 +85,7 @@ def create_app(
     allowed_hosts: list[str] | None = None,
 ) -> FastAPI:
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    default_context_size = models.context_tokens
     store = chat_store if chat_store is not None else ChatStore()
     hosts = allowed_hosts if allowed_hosts is not None else ["localhost", "127.0.0.1", "[::1]"]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
@@ -149,7 +150,7 @@ def create_app(
         await socket.accept()
         history: list[dict[str, str]] = []
         selection: dict[str, str] | None = None
-        context_size: int | None = None
+        context_size = default_context_size
         cancelled = threading.Event()
         turn_finished = threading.Event()
         worker: asyncio.Task[None] | None = None
@@ -235,8 +236,7 @@ def create_app(
                         else context_size
                     )
                     if selection is not None and (
-                        requested != selection
-                        or (requested_context is not None and requested_context != context_size)
+                        requested != selection or requested_context != context_size
                     ):
                         raise ValueError(
                             "Stop the conversation before changing models or context size."
@@ -254,8 +254,7 @@ def create_app(
                             {"role": item["role"], "content": item["content"]} for item in restored
                         ]
                     selection = requested
-                    if requested_context is not None:
-                        context_size = requested_context
+                    context_size = requested_context
                 except (ValueError, TypeError) as error:
                     await socket.send_json({"type": "error", "message": str(error)})
                     continue

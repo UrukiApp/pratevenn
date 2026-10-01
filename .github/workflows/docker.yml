@@ -25,6 +25,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  call-tests:
+    uses: ./.github/workflows/tests.yml
+
   images:
     name: Build images
     runs-on: ubuntu-latest

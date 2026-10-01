@@ -108,7 +108,8 @@ def test_full_unicode_chat_save_restore_and_review(tmp_path, character):
     ] * 200
     models = FakeModels()
 
-    def review(messages, cancelled, emit, selection):
+    def review(messages, cancelled, emit, selection, context_tokens=None):
+        assert context_tokens == 8192
         assert messages == transcript
         emit({"type": "done", "review": True})
 
@@ -145,7 +146,8 @@ def test_resume_and_review_are_connection_local(tmp_path):
 
     models.selection = selection
 
-    def review(messages, cancelled, emit, selection):
+    def review(messages, cancelled, emit, selection, context_tokens=None):
+        assert context_tokens == 8192
         reviewed.append((messages, selection))
         if messages[0]["content"] == "wait":
             models.entered.set()

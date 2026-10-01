@@ -579,6 +579,50 @@ def test_start_cli_and_argument_validation(tmp_path, monkeypatch):
     cli.main()
     assert loads[-1] == (tmp_path, 8, -1, 16384)
 
+    monkeypatch.setenv("PRATEVENN_CONTEXT_SIZE", "invalid")
+    with pytest.raises(SystemExit) as error:
+        cli.main()
+    assert error.value.code == 2
+    monkeypatch.setattr("sys.argv", ["pratevenn", "start", "--context-size", "4096"])
+    cli.main()
+    assert loads[-1][-1] == 4096
+
+    downloads = []
+    monkeypatch.setattr(cli, "download_models", lambda *args, **kwargs: downloads.append(args))
+    monkeypatch.setattr("sys.argv", ["pratevenn", "setup", "--model-dir", str(tmp_path)])
+    cli.main()
+    assert downloads == [(tmp_path,)]
+
+
+def test_default_context_size_is_fixed_across_connections(monkeypatch):
+    models = FakeModels()
+    original_run = models.run_turn
+
+    def run(*args, **kwargs):
+        models.context_tokens = kwargs.get("context_tokens", models.context_tokens)
+        original_run(*args, **kwargs)
+
+    def turn(socket, **settings):
+        socket.send_json({"type": "text", "text": "Hei", **settings})
+        assert [socket.receive_json()["type"] for _ in range(3)] == ["transcript", "text", "done"]
+
+    monkeypatch.setattr(models, "run_turn", run)
+    headers = {"Origin": "http://127.0.0.1"}
+    with TestClient(create_app(models), base_url="http://127.0.0.1") as client:
+        with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as first:
+            turn(first)
+            with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as second:
+                turn(second, context_size=2048)
+                assert models.context_tokens == 2048
+                turn(first)
+                assert models.context_tokens == 8192
+                turn(second)
+                assert models.context_tokens == 2048
+            # New connections also use the server's default, not the last loaded size.
+            with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as third:
+                turn(third)
+    assert models.context_tokens_list == [8192, 2048, 8192, 2048, 8192]
+
 
 def test_context_size_selection_and_validation():
     models = FakeModels()
