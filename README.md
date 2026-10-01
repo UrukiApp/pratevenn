@@ -36,7 +36,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 The diagram below shows the architecture of Pratevenn and its components in detail.
 
 <div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="75%">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
 </div>
 
 ---
@@ -98,7 +98,7 @@ Download all the models before starting the container:
 docker compose run --rm pratevenn setup --full
 ```
 
-You only need to do this one time at the start.
+You only need to do this one time, at the start.
 It also may take a while, depending on your internet speed.
 
 ##### 3. Start Pratevenn
