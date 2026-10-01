@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff">
+  <title>Pratevenn · Let's speak Norwegian</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    (() => {
+      let saved;
+      try { saved = localStorage.getItem("pratevenn.theme"); } catch {}
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = saved === "dark" || saved === "light" ? saved : (prefersDark ? "dark" : "light");
+      if (saved === "dark" || saved === "light") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = theme === "dark" ? "#212121" : "#ffffff";
+    })();
+  </script>
+  <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+  <main>
+    <div class="layout">
+      <aside id="settings" aria-label="Conversation settings" tabindex="-1">
+        <div class="sidebar-header">
+          <a class="brand" href="/" aria-label="Pratevenn home">pratevenn<span aria-hidden="true">✳</span></a>
+          <button id="sidebarClose" type="button" class="icon-button mobile-only" aria-label="Close sidebar" title="Close sidebar">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="sidebar-caption">Your Norwegian practice partner</p>
+        <button id="sidebarNewChat" type="button" class="sidebar-new-chat">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New chat</span>
+        </button>
+        <h2>Settings</h2>
+        <details id="promptDetails"><summary>System prompt</summary><fieldset id="promptSettings" disabled><legend class="sr-only">System prompt settings</legend>
+          <label for="systemPrompt">Instructions for Pratevenn</label>
+          <textarea id="systemPrompt" lang="nb" rows="10" required aria-describedby="promptHint"></textarea>
+          <p id="promptHint" class="hint">These instructions guide the conversation. Edits apply to the next turn.</p>
+          <button id="resetPrompt" type="button" class="secondary">Reset to default</button>
+        </fieldset></details>
+        <details id="modelDetails"><summary>AI models</summary><fieldset id="modelSettings" disabled><legend class="sr-only">AI model choices</legend>
+          <label for="sttModel">Speech recognition</label><select id="sttModel"></select>
+          <label for="llmModel">Conversation</label><select id="llmModel"></select>
+          <label for="ttsModel">Voice</label><select id="ttsModel"></select>
+          <p class="hint">Downloaded models only. Choose before starting a conversation.</p>
+        </fieldset></details>
+        <details id="speechDetails"><summary>Speech settings</summary>
+          <label for="speed">Voice speed <output id="speedValue" for="speed">0.85x</output></label><input id="speed" type="range" min="0.7" max="1.3" step="0.05" value="0.85"><p class="hint">How fast Pratevenn speaks. Lower values are easier to follow.</p>
+          <label for="pause">Time to find your words <output id="pauseValue" for="pause">1.3 s</output></label><input id="pause" type="range" min="700" max="2500" step="100" value="1300"><p class="hint">How long to wait after you stop speaking.</p>
+          <label for="threshold">Speech threshold <output id="thresholdValue" for="threshold">−30 dB</output></label><input id="threshold" type="range" min="-55" max="-20" value="-30"><p class="hint">Move to the left for a quiet voice. Move to the right if background noise starts a turn.</p>
+        </details>
+        <details id="historyDetails"><summary>Chat history</summary>
+          <label class="check"><input id="saveChats" type="checkbox"> Save chat history</label>
+          <p class="hint">Save completed text turns on this computer. Audio is never saved. Turning this off keeps existing saved chats.</p>
+          <label for="savedChats">Saved chats</label><select id="savedChats"><option value="">Choose a chat</option></select>
+          <div class="history-actions"><button id="openChat" type="button" class="secondary" disabled>Reopen</button><button id="deleteChat" type="button" class="secondary" disabled>Delete</button></div>
+          <button id="deleteAllChats" type="button" class="secondary" disabled>Delete all saved chats</button>
+          <p id="historyStatus" class="hint" role="status"></p>
+        </details>
+        <details id="reviewDetails"><summary>Practice review</summary>
+          <label class="check"><input id="showInlineFeedback" type="checkbox"> Real-time inline feedback</label>
+          <p class="hint">Show grammar and vocabulary suggestions beneath your messages as you practice.</p>
+          <button id="reviewChat" type="button" class="secondary" disabled>Review this chat</button>
+          <p class="hint">Review completed turns with the local model. Suggestions can be wrong, especially for speech transcripts. Pronunciation is not assessed.</p>
+          <p id="reviewStatus" class="hint" role="status"></p>
+          <div id="patterns"></div><div id="suggestions"></div>
+        </details>
+        <details id="contextDetails"><summary>Model context</summary>
+          <label for="contextSize">Context window size</label><select id="contextSize" disabled></select>
+          <p class="hint">Total tokens available for conversation prompt and reply.</p>
+          <label for="contextUsage">Context window</label><meter id="contextUsage" min="0" max="100" value="0"></meter>
+          <p id="contextStatus" class="hint" role="status">Start a turn to measure context usage.</p>
+          <p class="hint">Usage includes the system prompt and the last turn's generated tokens. The model uses recent turns that fit. Saved chats can contain more text.</p>
+        </details>
+        <div class="note"><span class="local">All on your computer</span><p>Audio and transcripts stay here.<br>No accounts. No cloud.</p></div>
+      </aside>
+      <section class="conversation" aria-label="Conversation">
+        <header class="conversation-head">
+          <div class="head-left">
+            <button id="sidebarToggle" type="button" class="icon-button" aria-label="Toggle sidebar" title="Toggle sidebar" aria-controls="settings" aria-expanded="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            </button>
+            <h1>Pratevenn <span>Bokmål</span></h1>
+          </div>
+          <div class="header-actions">
+            <button id="themeToggle" type="button" class="icon-button" aria-label="Switch to dark theme" title="Switch to dark theme">
+              <svg class="theme-icon-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="theme-icon-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button id="newChat" type="button" class="secondary">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span>New chat</span>
+            </button>
+            <a class="settings-link" href="#settings">Settings</a>
+            <span id="ready" class="badge">Connecting</span>
+          </div>
+        </header>
+        <div id="hologram" aria-hidden="true">
+          <div class="holo-scene">
+            <div class="holo-beam"></div>
+            <div class="holo-orbit"></div><div class="holo-orbit holo-cross"></div>
+            <div class="holo-core">
+              <svg viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                <circle cx="50" cy="50" r="47"/>
+                <ellipse cx="50" cy="50" rx="47" ry="17"/>
+                <ellipse cx="50" cy="50" rx="47" ry="33"/>
+                <ellipse cx="50" cy="50" rx="17" ry="47"/>
+                <ellipse cx="50" cy="50" rx="33" ry="47"/>
+                <path d="M3 50h94M50 3v94M17 17l66 66M17 83l66-66"/>
+                <g class="holo-nodes">
+                  <circle cx="50" cy="3" r="1.5"/><circle cx="50" cy="97" r="1.5"/>
+                  <circle cx="3" cy="50" r="1.5"/><circle cx="97" cy="50" r="1.5"/>
+                  <circle cx="17" cy="17" r="1.5"/><circle cx="83" cy="83" r="1.5"/>
+                  <circle cx="17" cy="83" r="1.5"/><circle cx="83" cy="17" r="1.5"/>
+                  <circle cx="33" cy="50" r="1.5"/><circle cx="67" cy="50" r="1.5"/>
+                </g>
+              </svg>
+            </div>
+            <div class="holo-base"></div>
+          </div>
+        </div>
+        <div id="messages" role="log" aria-live="polite" aria-label="Conversation transcript"><div id="welcome">
+          <div class="intro">
+            <div class="intro-badge" aria-hidden="true"><span>✳</span></div>
+            <p class="eyebrow" lang="nb">Hei! La oss snakke norsk.</p>
+            <h2>What shall we talk about?</h2>
+            <p class="intro-sub">Speak naturally, or type a message below.<br>Take your time. Every conversation is practice.</p>
+            <div class="prompt-suggestions" role="group" aria-label="Conversation starters">
+              <button type="button" class="prompt-chip" data-prompt="Hvordan er været i dag?">
+                <span class="chip-title">Snakk om været</span>
+                <span class="chip-example">«Hvordan er været i dag?»</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Hei! Jeg vil gjerne bestille en kaffe og en bolle.">
+                <span class="chip-title">Bestill på kafé</span>
+                <span class="chip-example">«Jeg vil bestille kaffe og bolle»</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Hva pleier du å gjøre i helgene?">
+                <span class="chip-title">Fortell om helgen</span>
+                <span class="chip-example">«Hva pleier du å gjøre i helgene?»</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Kan du hjelpe meg å øve på vanlige norske verb?">
+                <span class="chip-title">Øv på verb</span>
+                <span class="chip-example">«Hjelp meg å øve på verb»</span>
+              </button>
+            </div>
+          </div>
+        </div></div>
+        <div class="controls">
+          <div class="status-line"><span id="indicator"></span><span id="status" role="status">Checking local models …</span><span id="latency"></span></div>
+          <meter id="meter" min="0" max="0.1" value="0" aria-label="Microphone volume"></meter>
+          <form id="textForm">
+            <label class="sr-only" for="text">Type a message in Norwegian</label><input id="text" type="text" lang="nb" placeholder="Message Pratevenn in Norwegian …" maxlength="1000" autocomplete="off">
+            <div class="composer-actions">
+              <div class="buttons">
+                <button id="start" type="button" disabled>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-3 0h6"/></svg>
+                  <span>Start conversation</span>
+                </button>
+                <button id="stop" type="button" class="secondary" disabled>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+                  <span>Stop</span>
+                </button>
+              </div>
+              <button id="send" type="submit" aria-label="Send message" disabled>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              </button>
+            </div>
+          </form>
+          <p class="hint">The microphone pauses while Pratevenn answers. Stop ends this session.</p>
+          <footer>Local AI can make mistakes. Keep practicing.</footer>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
