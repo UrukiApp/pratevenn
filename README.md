@@ -26,6 +26,11 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 - Shows grammar tips as you chat and lets you review your mistakes
 - Supports both CPU and NVIDIA GPUs (for faster replies)
 
+
+> [!IMPORTANT]
+> Pratevenn is in early development, so bugs and breaking changes are expected.
+> Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
+
 ### How It Works
 
 The diagram below shows the architecture of Pratevenn and its components in detail.
