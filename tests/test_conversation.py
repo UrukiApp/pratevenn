@@ -22,6 +22,7 @@ from pratevenn.models import (
     PROMPT_TOKENS,
     SYSTEM_PROMPT,
     Models,
+    capitalize_first,
     chat_messages,
     discover_models,
     download_models,
@@ -65,25 +66,26 @@ class FakeModels(Models):
         self.prompts.append(system_prompt)
         self.speeds.append(speed)
         self.context_tokens_list.append(kwargs.get("context_tokens"))
-        if text == "wait":
+        lowered = text.lower() if isinstance(text, str) else ""
+        if lowered == "wait":
             cancelled.wait(5)
             if cancelled.is_set():
                 self.cancelled.set()
             return
-        if text == "hold":
+        if lowered == "hold":
             self.holding.wait(5)
             emit({"type": "done"})
             return
-        if text == "cancel_emit":
+        if lowered == "cancel_emit":
             cancelled.set()
             emit({"type": "text", "text": "late"})
             raise RuntimeError("cancelled turn error")
-        if text == "cancel_value_error":
+        if lowered == "cancel_value_error":
             cancelled.set()
             raise ValueError("cancelled value error")
-        if text == "value_error":
+        if lowered == "value_error":
             raise ValueError("custom model error")
-        if text == "fail":
+        if lowered == "fail":
             raise RuntimeError("test model failure")
         self.histories.append(list(history))
         emit({"type": "transcript", "text": text or "Hei"})
@@ -976,3 +978,41 @@ def test_run_turn_branches_and_cancellation():
     assert events[-1]["feedback"] == [
         {"original": "feil", "correction": "rett", "category": "spelling", "explanation": "rettet"}
     ]
+
+
+def test_capitalize_first():
+    assert capitalize_first("") == ""
+    assert capitalize_first("123") == "123"
+    assert capitalize_first("hei") == "Hei"
+    assert capitalize_first("Hei") == "Hei"
+    assert capitalize_first("«hei»") == "«Hei»"
+    assert capitalize_first('"hallo"') == '"Hallo"'
+    assert capitalize_first("ærlig") == "Ærlig"
+    assert capitalize_first("ønske") == "Ønske"
+    assert capitalize_first("åpen") == "Åpen"
+    text, _, _ = parse_turn({"type": "text", "text": "hva er klokka?"})
+    assert text == "hva er klokka?"
+
+    from types import SimpleNamespace
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+
+    class LowercaseRecognizer:
+        def transcribe(self, *args, **kwargs):
+            return [SimpleNamespace(text="hva skjer i dag?")], None
+
+    models.stt = LowercaseRecognizer()
+    models.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
+    models.llm = SimpleNamespace(
+        create_completion=lambda *a, **kw: iter([{"choices": [{"text": "Svar!"}]}]),
+        n_tokens=5,
+    )
+    models.speak = lambda text, **kw: recording()
+    events = []
+    models.run_turn(None, recording(), [], threading.Event(), events.append)
+    assert events[1] == {"type": "transcript", "text": "Hva skjer i dag?"}
+
+    events.clear()
+    models.run_turn("hva skjer i dag?", None, [], threading.Event(), events.append)
+    assert events[1] == {"type": "transcript", "text": "hva skjer i dag?"}

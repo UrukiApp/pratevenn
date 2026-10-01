@@ -193,6 +193,14 @@ def validate_audio(data: bytes) -> None:
         raise ValueError("Expected 0.1-30 seconds of mono, 16 kHz, 16-bit WAV audio.")
 
 
+def capitalize_first(text: str) -> str:
+    """Capitalize the first letter of an utterance, preserving leading punctuation or quotes."""
+    for index, char in enumerate(text):
+        if char.isalpha():
+            return text[:index] + char.upper() + text[index + 1 :]
+    return text
+
+
 def voice_speakers(path: Path) -> dict[str, int]:
     """Read valid non-default speakers from Piper's local configuration."""
     try:
@@ -670,7 +678,9 @@ class Models:
                     vad_filter=True,
                     condition_on_previous_text=False,
                 )
-                text = " ".join(segment.text.strip() for segment in segments).strip()
+                text = capitalize_first(
+                    " ".join(segment.text.strip() for segment in segments).strip()
+                )
             if cancelled.is_set():
                 return
             if not text:

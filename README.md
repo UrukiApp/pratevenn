@@ -7,7 +7,6 @@
 <h2>Pratevenn</h2>
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/UrukiApp/pratevenn/tests.yml?label=tests&style=flat&labelColor=282c34&logo=github)](https://github.com/UrukiApp/pratevenn/actions/workflows/tests.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/UrukiApp/pratevenn?label=coverage&style=flat&labelColor=282c34&logo=codecov)](https://codecov.io/gh/UrukiApp/pratevenn)
 [![License](https://img.shields.io/badge/license-MIT-007ec6?style=flat&labelColor=282c34&logo=open-source-initiative)](LICENSE)
 [![Container Images](https://img.shields.io/github/v/tag/UrukiApp/pratevenn?label=ghcr.io&style=flat&labelColor=282c34&logo=docker&color=507ec6&sort=semver)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn)
 
@@ -19,6 +18,11 @@ A private, local conversational AI tool for Norwegian language learners
 
 Pratevenn lets you practice speaking Norwegian with an AI on your own computer while everything stays on your machine.
 
+<br>
+<div align="center">
+  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
+</div>
+
 ### Key Features
 
 - Full real-time conversation in natural Norwegian Bokmål with a simple UI
@@ -29,14 +33,6 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 > [!IMPORTANT]
 > Pratevenn is in early development, so bugs and breaking changes are expected.
 > Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
-
-### How It Works
-
-The diagram below shows the architecture of Pratevenn and its components in detail.
-
-<div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
-</div>
 
 ---
 
@@ -121,7 +117,7 @@ the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/c
 
 Open <http://localhost:8000> in your browser and click *Start conversation*.
 
-#### Managing Containers
+#### Managing Pratevenn Container
 
 Use standard Docker Compose commands to manage Pratevenn:
 
@@ -132,6 +128,16 @@ docker compose down                     # Remove containers
 docker compose down -v                  # Remove containers (and downloaded models)
 docker compose logs -f                  # Check the logs
 ```
+
+---
+
+### How It Works
+
+The diagram below shows the architecture of Pratevenn and its components in detail.
+
+<div align="center">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="80%">
+</div>
 
 ---
 
