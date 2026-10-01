@@ -13,7 +13,7 @@ A private, local conversational AI tool for Norwegian language learners
 
 ---
 
-Pratevenn lets you practice speaking Norwegian with an AI on your own computer. Your microphone audio, transcripts, and model files never leave your machine.
+Pratevenn lets you practice speaking Norwegian with an AI on your own computer while everything stays on your machine.
 
 ### Key Features
 
@@ -114,6 +114,16 @@ docker compose logs -f                  # Check the logs
 ### Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute.
+
+### Acknowledgments
+
+Pratevenn uses the following open-source projects and models:
+
+- [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
+- [Piper](https://github.com/rhasspy/piper) for text-to-speech synthesis.
+- [Gemma models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and GPU.
+- [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.
 
 ### License
 
