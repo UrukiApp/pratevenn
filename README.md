@@ -13,30 +13,24 @@ A private, local conversational AI tool for Norwegian language learners
 
 ---
 
-Pratevenn provides an interactive voice interface for practicing conversation in Norwegian with a local AI model. Audio recordings, transcripts, and model inference stay entirely on your computer.
+Pratevenn lets you practice speaking Norwegian with an AI on your own computer. Your microphone audio, transcripts, and model files never leave your machine.
 
 ### Key Features
 
-- Spoken conversation practice: Provides speech recognition with NB-Whisper and natural speech synthesis with Piper TTS.
-- Local and private execution: Runs all audio processing, transcription, and language model inference on your machine with no external network requests, accounts, or telemetry.
-- Norwegian language partner: Supports interactive conversation in Norwegian Bokmål powered by local Gemma models through llama.cpp.
-- Real-time feedback and review: Offers optional grammar suggestions during conversation, as well as turn-by-turn chat reviews.
-- Hardware acceleration options: Supports CPU execution and NVIDIA GPU acceleration via CUDA.
-- Self-contained web interface: Delivers a clean browser interface with light and dark themes, adjustable speech speeds, and optional local history storage.
+- Full real-time conversation in natural Norwegian Bokmål with a simple UI
+- Fully private and offline (no internet or cloud accounts needed)
+- Shows grammar tips as you chat and lets you review your mistakes
+- Supports both CPU and NVIDIA GPUs (for faster replies)
 
 ---
 
 ### Getting Started
 
-> [!IMPORTANT]
-> Web browsers require access via `http://localhost:8000`, `http://127.0.0.1:8000`, or an HTTPS origin to grant microphone permissions.
-> Pratevenn uses local AI models that must be downloaded once before starting the application.
-
 #### Running with Docker Compose
 
 ##### 1. Compose Configuration
 
-Use the provided [docker-compose.yaml](docker-compose.yaml) or save the configuration below:
+Use the included [docker-compose.yaml](docker-compose.yaml), or save the text below as `docker-compose.yml`:
 
 ```yaml
 services:
@@ -81,7 +75,7 @@ volumes:
 
 ##### 2. Download the Models
 
-Download the default models into the shared volume before launching the service:
+Download the default models before starting the container:
 
 ```sh
 docker compose run --rm pratevenn setup
@@ -89,77 +83,38 @@ docker compose run --rm pratevenn setup
 
 ##### 3. Start Pratevenn
 
-Start the CPU service in the background:
+Start the CPU version:
 
 ```sh
 docker compose up -d
 ```
 
-For NVIDIA GPU acceleration with CUDA, start the CUDA profile instead:
+If you have an NVIDIA GPU on your machine, start the CUDA version instead:
 
 ```sh
 docker compose --profile cuda up -d pratevenn-cuda
 ```
 
-Open <http://localhost:8000> in your browser and click **Start conversation**.
+Open <http://localhost:8000> in your browser and click *Start conversation*.
 
-#### Managing Docker Containers
+#### Managing Containers
 
 Use standard Docker Compose commands to manage Pratevenn:
 
 ```sh
 docker compose up -d                    # Start Pratevenn
-docker compose stop                     # Stop Pratevenn (models and data are kept)
+docker compose stop                     # Stop Pratevenn (keeps your models and data)
 docker compose down                     # Remove containers
-docker compose down -v                  # Remove containers and downloaded model volumes
-docker compose logs -f                  # Follow the log stream
+docker compose down -v                  # Remove containers (and downloaded models)
+docker compose logs -f                  # Check the logs
 ```
-
----
-
-#### Running from Source with Python
-
-You can also run Pratevenn directly using Python 3.11 through 3.14 and [uv](https://docs.astral.sh/uv/).
-
-##### 1. Clone the Repository
-
-```sh
-git clone https://github.com/UrukiApp/pratevenn.git
-cd pratevenn
-```
-
-##### 2. Install Dependencies
-
-Sync dependencies from the lockfile:
-
-```sh
-make install
-```
-
-##### 3. Download Models
-
-Fetch the default speech recognition, conversation, and voice models:
-
-```sh
-make models
-```
-
-To download all bundled options, run `make download-full`.
-
-##### 4. Start the Server
-
-```sh
-make run
-```
-
-Then navigate to <http://127.0.0.1:8000> in your web browser.
 
 ---
 
 ### Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to make a contribution.
+See [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute.
 
 ### License
 
-Pratevenn is licensed under the MIT License (see [LICENSE](LICENSE)). Dependencies and model weights keep their own licenses.
+Pratevenn is licensed under the MIT License (see [LICENSE](LICENSE)).
