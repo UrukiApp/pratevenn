@@ -1,4 +1,8 @@
 <div align="center">
+  <picture>
+    <img alt="Pratevenn Logo" src="docs/assets/logo.png" height="25%" width="25%">
+  </picture>
+<br>
 
 <h2>Pratevenn</h2>
 
@@ -27,7 +31,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 The diagram below shows the architecture of Pratevenn and its components.
 
 <div align="center">
-  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="95%">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="70%">
 </div>
 
 ---
