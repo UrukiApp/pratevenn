@@ -28,7 +28,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 
 ### How It Works
 
-The diagram below shows the architecture of Pratevenn and its components.
+The diagram below shows the architecture of Pratevenn and its components in detail.
 
 <div align="center">
   <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="75%">
@@ -129,7 +129,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute.
 
 ### Acknowledgments
 
-Pratevenn uses the following open-source projects and models for its core functionality:
+The logo is generated with the help of [ChatGPT](https://chatgpt.com/).
+
+Additionally, Pratevenn uses the following open-source projects and models for its core functionality:
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.

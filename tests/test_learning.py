@@ -77,6 +77,7 @@ def test_optional_archive_crud_and_http_boundary(tmp_path):
         assert not store.path.exists()
         for invalid in ([], messages()[:1], messages()[::-1], [{"role": "user", "content": "x" * 1001}, messages()[1]]):
             assert client.put(route, json=invalid, headers=headers).status_code == 400
+        assert client.put(route, content=b"{}", headers={**headers, "Content-Type": "text/plain"}).status_code == 415
         assert client.put(route, content=b"x" * (MAX_CHAT_BYTES + 1), headers={**headers, "Content-Type": "application/json"}).status_code == 413
         assert client.put(route, json=messages(source="audio"), headers=headers).json() == {"saved": True}
         assert store.path.exists()
@@ -91,6 +92,10 @@ def test_optional_archive_crud_and_http_boundary(tmp_path):
         assert client.put(route, json=messages(), headers=headers).status_code == 200
         assert client.delete("/api/chats", headers=headers).status_code == 200
         assert store.list_chats() == []
+        nonexistent = ChatStore(tmp_path / "absent" / "store.sqlite3")
+        assert nonexistent.get(identifier) is None
+        nonexistent.delete(identifier)
+        nonexistent.delete()
 
 
 def test_chat_validation_bounds_and_sources():
@@ -243,13 +248,47 @@ def test_review_batches_evidence_cancellation_and_lock_release():
     model.llm.create_completion = cancel_completion
     model.review_turn(transcript, cancelled, events.append, model.loaded)
     assert all(event["type"] == "status" for event in events)
+    def complete_then_cancel(*args, **kwargs):
+        yield {"choices": [{"text": "[]"}]}
+        cancelled.set()
+
+    cancelled.clear()
+    model.llm.create_completion = complete_then_cancel
+    events.clear()
+    model.review_turn(transcript, cancelled, events.append, model.loaded)
+    assert not any(event.get("type") == "review" for event in events)
     assert not model.lock.locked()
 
+    loaded_selections = []
+    model.load = lambda selection, **kwargs: loaded_selections.append(selection)
+    model.prompt = lambda history, text, prompt: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
+    model.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "[]"}]}])
+    events.clear()
+    model.review_turn(transcript[:2], threading.Event(), events.append, {"llm": "custom"})
+    assert loaded_selections == [{"llm": "custom"}]
+
+    model.prompt = lambda *a, **kw: ([1] * 5000, SimpleNamespace(stop=[], stopping_criteria=None))
+    with pytest.raises(ValueError, match="too long to review"):
+        model.review_turn(transcript[:4], threading.Event(), events.append, model.loaded)
+    assert not model.lock.locked()
+
+    model.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
     model.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "invalid JSON"}]}])
     with pytest.raises(ValueError, match="could not produce"):
         model.review_turn(transcript, threading.Event(), events.append, model.loaded)
     assert not model.lock.locked()
     assert review_findings([finding(True), finding(category="invented"), finding(correction="I går jeg gikk")], messages(), 1, 1) == []
+    for invalid_review in ("not a list", [finding()] * 4):
+        with pytest.raises(ValueError, match="invalid review"):
+            review_findings(invalid_review, messages(), 1, 1)
+    for invalid_item in (
+        ["not a dict"],
+        [{"turn": 1, "original": 123, "correction": "b", "category": "other", "explanation": "e"}],
+        [{"turn": 1, "original": "", "correction": "b", "category": "other", "explanation": "e"}],
+        [{"turn": 1, "original": "a" * 1001, "correction": "b", "category": "other", "explanation": "e"}],
+    ):
+        with pytest.raises(ValueError, match="invalid suggestion"):
+            review_findings(invalid_item, messages(), 1, 1)
 
 
 def test_inline_findings_and_eval_turn():
@@ -268,6 +307,12 @@ def test_inline_findings_and_eval_turn():
     assert inline_findings([{**valid, "original": "ikke i teksten"}], text) == []
     assert inline_findings([{**valid, "correction": valid["original"]}], text) == []
     assert inline_findings([valid, valid], text) == [valid]
+    for invalid_detail in (
+        {"original": 123, "correction": "a", "category": "word_order", "explanation": "e"},
+        {"original": "", "correction": "a", "category": "word_order", "explanation": "e"},
+        {"original": "a" * 501, "correction": "a", "category": "word_order", "explanation": "e"},
+    ):
+        assert inline_findings([invalid_detail], text) == []
 
     model = Models.__new__(Models)
     model.eval_prompt = lambda t: ([1] * 5, SimpleNamespace(stop=[], stopping_criteria=None))
@@ -280,9 +325,39 @@ def test_inline_findings_and_eval_turn():
     cancelled.set()
     assert model.eval_turn(text, cancelled) == []
 
+    def cancel_eval_chunks(*args, **kwargs):
+        yield {"choices": [{"text": "["}]}
+        cancelled.set()
+        yield {"choices": [{"text": "]"}]}
+
+    cancelled.clear()
+    model.llm.create_completion = cancel_eval_chunks
+    assert model.eval_turn(text, cancelled) == []
+
+    def cancel_after_eval_chunks(*args, **kwargs):
+        yield {"choices": [{"text": "[]"}]}
+        cancelled.set()
+
+    cancelled.clear()
+    model.llm.create_completion = cancel_after_eval_chunks
+    assert model.eval_turn(text, cancelled) == []
+
     cancelled.clear()
     model.llm = SimpleNamespace(
         create_completion=lambda *a, **kw: iter([{"choices": [{"text": "not json"}]}])
     )
     assert model.eval_turn(text, cancelled) == []
     assert "Du vurderer én ytring" in INLINE_FEEDBACK_PROMPT
+
+
+def test_eval_prompt():
+    model = Models.__new__(Models)
+    model.formatter = lambda messages, enable_thinking: SimpleNamespace(
+        prompt="prompt text", stop=["</s>"], stopping_criteria=None, added_special=False
+    )
+    model.llm = SimpleNamespace(
+        tokenize=lambda b, add_bos=True, special=True: [10, 20, 30]
+    )
+    tokens, formatted = model.eval_prompt("Hei på deg")
+    assert tokens == [10, 20, 30]
+    assert formatted.prompt == "prompt text"
