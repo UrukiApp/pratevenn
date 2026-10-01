@@ -60,18 +60,20 @@ RUN apt-get update \
         libstdc++6 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --uid 10001 --create-home pratevenn \
-    && mkdir -p /models && chown -R pratevenn:pratevenn /models
+    && mkdir -p /models /data \
+    && chown -R pratevenn:pratevenn /models /data \
+    && chmod 700 /data
 
 WORKDIR /app
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PRATEVENN_MODEL_DIR=/models \
-    PRATEVENN_HOST=0.0.0.0 \
-    PRATEVENN_ALLOWED_HOSTS=*
+    PRATEVENN_DATA_DIR=/data \
+    PRATEVENN_HOST=0.0.0.0
 
 EXPOSE 8000
-VOLUME ["/models"]
+VOLUME ["/models", "/data"]
 
 # ------------------------------------------------------------------------------
 # Target: CPU
@@ -83,7 +85,7 @@ COPY --from=build-cpu --chown=pratevenn:pratevenn /app/pyproject.toml /app/pypro
 
 USER pratevenn
 ENTRYPOINT ["pratevenn"]
-CMD ["start", "--host", "0.0.0.0", "--port", "8000", "--model-dir", "/models", "--allowed-hosts", "*"]
+CMD ["start", "--host", "0.0.0.0", "--port", "8000", "--model-dir", "/models"]
 
 # ------------------------------------------------------------------------------
 # Target: CUDA
@@ -99,4 +101,4 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
 
 USER pratevenn
 ENTRYPOINT ["pratevenn"]
-CMD ["start", "--host", "0.0.0.0", "--port", "8000", "--model-dir", "/models", "--allowed-hosts", "*"]
+CMD ["start", "--host", "0.0.0.0", "--port", "8000", "--model-dir", "/models"]

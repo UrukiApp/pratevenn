@@ -23,7 +23,16 @@ To be added.
 
 ### Documentation
 
-To be added.
+Docker ports are published only on `127.0.0.1`, and the local Host allowlist remains enabled.
+Rebuild existing images to apply these changes.
+The Docker Make targets save chats in the named `pratevenn-data` volume at `/data`.
+Compose uses a separate named `data` volume. These volumes survive container removal.
+Before replacing an older container, copy its `/home/pratevenn/.local/share/pratevenn/chats.sqlite3`
+to the data volume to keep existing saved chats.
+`PRATEVENN_DATA_DIR` sets the chat database directory; Docker images use `/data`.
+
+Each conversation connection keeps its context size until you stop it.
+The `--context-size` option overrides `PRATEVENN_CONTEXT_SIZE`.
 
 ---
 

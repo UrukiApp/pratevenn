@@ -85,11 +85,11 @@ docker-build-cuda: ## Build the CUDA Docker image
 
 .PHONY: docker-run-cpu
 docker-run-cpu: ## Run Pratevenn CPU in Docker with local models
-	docker run --rm -it -p 8000:8000 -v $(CURDIR)/$(MODEL_DIR):/models pratevenn:cpu
+	docker run --rm -it -p 127.0.0.1:8000:8000 -v $(CURDIR)/$(MODEL_DIR):/models -v pratevenn-data:/data pratevenn:cpu
 
 .PHONY: docker-run-cuda
 docker-run-cuda: ## Run Pratevenn CUDA in Docker with local models
-	docker run --rm -it --gpus all -p 8000:8000 -v $(CURDIR)/$(MODEL_DIR):/models pratevenn:cuda
+	docker run --rm -it --gpus all -p 127.0.0.1:8000:8000 -v $(CURDIR)/$(MODEL_DIR):/models -v pratevenn-data:/data pratevenn:cuda
 
 .PHONY: compose-up
 compose-up: ## Start Pratevenn CPU with Docker Compose
