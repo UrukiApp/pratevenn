@@ -18,11 +18,6 @@ A private, local conversational AI tool for Norwegian language learners
 
 Pratevenn lets you practice speaking Norwegian with an AI on your own computer while everything stays on your machine.
 
-<br>
-<div align="center">
-  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
-</div>
-
 ### Key Features
 
 - Full real-time conversation in natural Norwegian Bokmål with a simple UI
@@ -113,11 +108,17 @@ docker compose --profile cuda up -d pratevenn-cuda
 ```
 
 > [!IMPORTANT]
-> Using the CUDA image is the recommended way of running Pratevenn.
+> Using the CUDA image (using an NVIDIA GPU with 8GB of VRAM or more) is the recommended way of running Pratevenn.
 > Note that normally on Linux you need to have
 the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed.
 
 Open <http://localhost:8000> in your browser and click *Start conversation*.
+
+
+<br>
+<div align="center">
+  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
+</div>
 
 #### Managing Pratevenn Container
 
@@ -155,7 +156,7 @@ Additionally, Pratevenn uses the following open-source projects and models for i
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
-- [Gemma 4 models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
+- [Gemma 4 models](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/) for the conversation and reviewing the chat.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and
   GPU.
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.

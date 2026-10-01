@@ -77,8 +77,8 @@ url = "https://pypi.org/simple"
 default = true
 
 [project.urls]
-Repository = "https://github.com/habedi/konvers"
-Documentation = "https://github.com/habedi/konvers/blob/main/docs/index.md"
+Repository = "https://github.com/UrukiApp/pratevenn"
+Documentation = "https://github.com/UrukiApp/pratevenn/blob/main/README.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pratevenn"]

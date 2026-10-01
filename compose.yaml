@@ -1,6 +1,6 @@
 services:
   pratevenn:
-    image: ghcr.io/cogitatortech/pratevenn:${PRATEVENN_VERSION:-latest}-cpu
+    image: ghcr.io/urukiapp/pratevenn:${PRATEVENN_VERSION:-latest}-cpu
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   pratevenn-cuda:
-    image: ghcr.io/cogitatortech/pratevenn:${PRATEVENN_VERSION:-latest}-cuda
+    image: ghcr.io/urukiapp/pratevenn:${PRATEVENN_VERSION:-latest}-cuda
     build:
       context: .
       dockerfile: Dockerfile
