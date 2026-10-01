@@ -155,7 +155,7 @@ Additionally, Pratevenn uses the following open-source projects and models for i
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
-- [Gemma models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
+- [Gemma 4 models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and
   GPU.
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.
