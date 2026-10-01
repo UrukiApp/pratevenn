@@ -1,6 +1,6 @@
 # Mounts the host .models directory so locally downloaded models are reused without re-downloading.
 # Use with:
-#   docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build
+#   docker compose -f compose.yaml -f compose.dev.yaml up --build
 # or:
 #   make start-dev
 services:

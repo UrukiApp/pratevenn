@@ -34,6 +34,7 @@ class FakeModels(Models):
         self.speeds = []
         self.entered = threading.Event()
         self.cancelled = threading.Event()
+        self.holding = threading.Event()
         self.selections = []
         self.prompts = []
         self.context_tokens_list = []
@@ -68,13 +69,16 @@ class FakeModels(Models):
                 self.cancelled.set()
             return
         if text == "hold":
-            self.entered.wait(0.5)
+            self.holding.wait(5)
             emit({"type": "done"})
             return
         if text == "cancel_emit":
             cancelled.set()
             emit({"type": "text", "text": "late"})
             raise RuntimeError("cancelled turn error")
+        if text == "cancel_value_error":
+            cancelled.set()
+            raise ValueError("cancelled value error")
         if text == "value_error":
             raise ValueError("custom model error")
         if text == "fail":
@@ -176,13 +180,20 @@ def test_websocket_history_errors_and_cancellation():
             ws.send_json({"type": "text", "text": "value_error"})
             error_msg = ws.receive_json()
             assert error_msg["type"] == "error" and error_msg["message"] == "custom model error"
+        with client.websocket_connect(
+            "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
+        ) as ws:
             ws.send_json({"type": "text", "text": "cancel_emit"})
-            models.entered.clear()
+            ws.send_json({"type": "text", "text": "cancel_value_error"})
+        with client.websocket_connect(
+            "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
+        ) as ws:
+            models.holding.clear()
             ws.send_json({"type": "text", "text": "hold"})
             ws.send_json({"type": "text", "text": "Hei"})
             busy_msg = ws.receive_json()
             assert busy_msg["type"] == "error" and "wait" in busy_msg["message"].lower()
-            models.entered.set()
+            models.holding.set()
             assert ws.receive_json()["type"] == "done"
         with client.websocket_connect(
             "ws://127.0.0.1/ws", headers={"Origin": "http://127.0.0.1"}
@@ -629,6 +640,8 @@ def test_start_cli_and_argument_validation(tmp_path, monkeypatch):
     cli.main()
     assert downloads == [(tmp_path,)]
 
+    monkeypatch.delenv("PRATEVENN_CONTEXT_SIZE", raising=False)
+
     def fail_load(*args, **kwargs):
         raise RuntimeError("model file missing")
 
@@ -818,6 +831,11 @@ def test_stt_model_loading_and_cuda_fallback(tmp_path, monkeypatch):
     assert stt_attempts == [("cuda", "float16"), ("cpu", "int8")]
     assert isinstance(models.stt, FakeWhisper)
 
+    models.gpu_layers = 0
+    models.loaded = {}
+    models.load({"stt": "stt/model"})
+    assert stt_attempts[-1] == ("cpu", "int8")
+
 
 def test_run_turn_branches_and_cancellation():
     from types import SimpleNamespace
@@ -928,8 +946,10 @@ def test_run_turn_branches_and_cancellation():
     assert events[-1]["type"] == "done"
 
     models.speak = speak_without_kwargs
-    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Med tegn. "}]}])
+    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Med tegn. En til! "}]}])
     events.clear()
+    models.run_turn("Hei", None, [], threading.Event(), events.append)
+    assert sum(1 for e in events if e.get("type") == "audio") == 2
     models.run_turn("Hei", None, [], threading.Event(), events.append)
     assert any(event.get("type") == "audio" for event in events)
 

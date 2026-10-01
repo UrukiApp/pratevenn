@@ -42,7 +42,7 @@ The diagram below shows the architecture of Pratevenn and its components in deta
 
 ##### 1. Compose Configuration
 
-Use the included [docker-compose.yaml](docker-compose.yaml), or save the text below as `docker-compose.yml`:
+Use the included [compose.yaml](compose.yaml), or save the text below as `compose.yaml`:
 
 ```yaml
 services:
@@ -87,10 +87,10 @@ volumes:
 
 ##### 2. Download the Models
 
-Download the default models before starting the container:
+Download all the models before starting the container:
 
 ```sh
-docker compose run --rm pratevenn setup
+docker compose run --rm pratevenn setup --full
 ```
 
 ##### 3. Start Pratevenn
