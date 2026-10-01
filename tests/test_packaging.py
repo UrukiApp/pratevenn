@@ -10,7 +10,7 @@ from packaging.markers import Marker
 
 def test_cuda_compose_target_selects_only_cuda_service():
     result = subprocess.run(
-        ["make", "-n", "compose-up-cuda", "COMPOSE=docker compose", "CUDA=0"],
+        ["make", "--no-print-directory", "-n", "compose-up-cuda", "COMPOSE=docker compose", "CUDA=0"],
         cwd=Path(__file__).resolve().parents[1],
         capture_output=True,
         text=True,

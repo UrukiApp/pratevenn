@@ -1,5 +1,5 @@
 {
-  description = "Pratevenn: local Norwegian voice conversations for language learners";
+  description = "Pratevenn: a local conversational AI tool for Norwegian language learners";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

@@ -1,7 +1,7 @@
 [project]
 name = "pratevenn"
 version = "0.1.0-alpha.1"
-description = "A conversational AI tool for Norwegian language learners"
+description = "A local conversational AI tool for Norwegian language learners"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [

@@ -29,6 +29,9 @@ would like to work on or if it has already been resolved.
 
 ### Development Workflow
 
+> [!IMPORTANT]
+> If you're using an AI-assisted coding tool like Claude Code or Codex, make sure the AI follows the instructions in the [AGENTS.md](AGENTS.md) file.
+
 #### Prerequisites
 
 Install GNU Make if it's not already installed on your system.
@@ -41,7 +44,6 @@ sudo apt-get install make
 - Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 - Run `make install` (or `make setup`) to create the environment and install the locked application and development dependencies.
 - Run `make models` once to download model weights, then `make run` to start Pratevenn.
-- Use `uv add PACKAGE` or `uv add --dev PACKAGE` to update dependencies and commit both `pyproject.toml` and `uv.lock`.
 
 #### Code Style
 
@@ -50,10 +52,6 @@ sudo apt-get install make
 #### Running Tests
 
 - Use the `make test` command to run the tests.
-
-#### Running Linter Checks
-
-- Use `uv run --locked ruff check --fix` to run the linter checks.
 
 #### See Available Commands
 
