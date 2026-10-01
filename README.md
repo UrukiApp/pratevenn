@@ -93,6 +93,9 @@ Download all the models before starting the container:
 docker compose run --rm pratevenn setup --full
 ```
 
+You only need to do this one time at the start.
+It also may take a while, depending on your internet speed.
+
 ##### 3. Start Pratevenn
 
 Start the CPU version:
