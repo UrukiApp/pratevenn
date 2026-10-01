@@ -18,6 +18,11 @@ A private, local conversational AI tool for Norwegian language learners
 
 Pratevenn lets you practice speaking Norwegian with an AI on your own computer while everything stays on your machine.
 
+<br>
+<div align="center">
+  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="80%">
+</div>
+
 ### Key Features
 
 - Full real-time conversation in natural Norwegian Bokmål with a simple UI
