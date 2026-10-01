@@ -22,6 +22,14 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 - Shows grammar tips as you chat and lets you review your mistakes
 - Supports both CPU and NVIDIA GPUs (for faster replies)
 
+### How It Works
+
+The diagram below shows the architecture of Pratevenn and its components.
+
+<div align="center">
+  <img alt="Pratevenn Architecture" src="docs/assets/diagrams/architecture.svg" width="95%">
+</div>
+
 ---
 
 ### Getting Started
@@ -117,10 +125,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute.
 
 ### Acknowledgments
 
-Pratevenn uses the following open-source projects and models:
+Pratevenn uses the following open-source projects and models for its core functionality:
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
-- [Piper](https://github.com/rhasspy/piper) for text-to-speech synthesis.
+- [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
 - [Gemma models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and GPU.
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.

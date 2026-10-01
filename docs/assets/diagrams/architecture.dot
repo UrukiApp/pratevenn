@@ -1,0 +1,108 @@
+digraph PratevennArchitecture {
+    fontname = "Helvetica,Arial,sans-serif"
+    layout = dot
+    rankdir = LR
+    ranksep = 0.8
+    nodesep = 0.5
+    splines = true
+    compound = true
+    bgcolor = "white"
+
+    node [
+        fontname = "Helvetica,Arial,sans-serif",
+        shape = box,
+        style = "filled,rounded",
+        color = "#555555",
+        fillcolor = "white",
+        penwidth = 1.4,
+        fontsize = 10
+    ]
+
+    edge [
+        fontname = "Helvetica,Arial,sans-serif",
+        color = "#444444",
+        fontsize = 9,
+        fontcolor = "#444444",
+        penwidth = 1.2
+    ]
+
+    subgraph cluster_browser {
+        label = "Browser Interface (Local Web UI)"
+        style = "rounded,dashed"
+        color = "#1E88E5"
+        fontcolor = "#1565C0"
+        bgcolor = "#F8FBFE"
+        margin = 16
+
+        mic [label = "Microphone\n(Web Audio Worklet)", fillcolor = "#E3F2FD", color = "#1E88E5"]
+        ui [label = "Transcript, Feedback\n& Settings UI", fillcolor = "#E3F2FD", color = "#1E88E5"]
+        speaker [label = "Audio Playback\n(Speaker)", fillcolor = "#E3F2FD", color = "#1E88E5"]
+    }
+
+    subgraph cluster_server {
+        label = "Pratevenn Server (FastAPI / Uvicorn)"
+        style = "rounded"
+        color = "#43A047"
+        fontcolor = "#2E7D32"
+        bgcolor = "#F9FBF9"
+        margin = 16
+
+        ws [label = "WebSocket Handler\n(/ws)", fillcolor = "#E8F5E9", color = "#43A047"]
+        turn_ctrl [label = "Turn Controller\n& Session State", fillcolor = "#E8F5E9", color = "#43A047"]
+        api [label = "REST Archive API\n(/api/chats, /api/status)", fillcolor = "#E8F5E9", color = "#43A047"]
+    }
+
+    subgraph cluster_pipeline {
+        label = "Local Inference Pipeline (Offline)"
+        style = "rounded,dashed"
+        color = "#FB8C00"
+        fontcolor = "#E65100"
+        bgcolor = "#FFFDF9"
+        margin = 16
+
+        stt [label = "Speech-to-Text\n(NB-Whisper / faster-whisper)", fillcolor = "#FFF3E0", color = "#FB8C00"]
+        llm [label = "Language Model\n(Gemma / llama.cpp)\n[CPU / CUDA]", fillcolor = "#FFF3E0", color = "#FB8C00"]
+        tts [label = "Text-to-Speech\n(Piper TTS / Norwegian Voice)", fillcolor = "#FFF3E0", color = "#FB8C00"]
+    }
+
+    subgraph cluster_storage {
+        label = "Local Storage (On-Device)"
+        style = "rounded,dashed"
+        color = "#8E24AA"
+        fontcolor = "#6A1B9A"
+        bgcolor = "#FCF9FD"
+        margin = 16
+
+        model_cache [label = "Model Files\n(~/.cache/pratevenn)", fillcolor = "#F3E5F5", color = "#8E24AA"]
+        chat_db [label = "Optional Chat Store\n(SQLite / chats.sqlite3)", fillcolor = "#F3E5F5", color = "#8E24AA"]
+    }
+
+    // Audio & Text inputs
+    mic -> ws [label = "Audio chunks\n(16 kHz WAV)", color = "#1E88E5"]
+    ui -> ws [label = "Text turns\n& settings", color = "#1E88E5"]
+    ui -> api [label = "Save / review\nrequests", color = "#1E88E5", style = "dashed"]
+
+    // Server routing
+    ws -> turn_ctrl [color = "#43A047"]
+    api -> chat_db [label = "Store / restore", color = "#8E24AA", style = "dashed"]
+
+    // Turn controller to pipeline
+    turn_ctrl -> stt [label = "User audio", color = "#FB8C00"]
+    turn_ctrl -> llm [label = "User text & prompt", color = "#FB8C00"]
+
+    // Pipeline flow
+    stt -> llm [label = "Transcribed text", color = "#FB8C00"]
+    llm -> tts [label = "Generated reply\nsentences", color = "#FB8C00"]
+
+    // Responses back to client
+    stt -> ws [label = "Live transcript", color = "#1E88E5"]
+    llm -> ws [label = "Streaming text\n& feedback", color = "#1E88E5"]
+    tts -> ws [label = "Audio stream", color = "#1E88E5"]
+    ws -> speaker [label = "Spoken audio", color = "#1E88E5"]
+    ws -> ui [label = "Tokens & hints", color = "#1E88E5"]
+
+    // Model loading
+    model_cache -> stt [style = "dotted", color = "#8E24AA", label = "Weights"]
+    model_cache -> llm [style = "dotted", color = "#8E24AA", label = "Weights"]
+    model_cache -> tts [style = "dotted", color = "#8E24AA", label = "Weights"]
+}
