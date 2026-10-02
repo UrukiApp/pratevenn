@@ -1,6 +1,6 @@
 [project]
 name = "pratevenn"
-version = "0.1.0-alpha.4"
+version = "0.1.0-alpha.5"
 description = "A local conversational AI tool for Norwegian language learners"
 readme = "README.md"
 license = { text = "MIT" }
@@ -77,8 +77,8 @@ url = "https://pypi.org/simple"
 default = true
 
 [project.urls]
-Repository = "https://github.com/habedi/konvers"
-Documentation = "https://github.com/habedi/konvers/blob/main/docs/index.md"
+Repository = "https://github.com/UrukiApp/pratevenn"
+Documentation = "https://github.com/UrukiApp/pratevenn/blob/main/README.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pratevenn"]

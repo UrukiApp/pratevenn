@@ -61,7 +61,7 @@ digraph PratevennArchitecture {
         margin = 16
 
         stt [label = "Speech-to-Text\n(NB-Whisper / faster-whisper)", fillcolor = "#FFF3E0", color = "#FB8C00"]
-        llm [label = "Language Model\n(Gemma / llama.cpp)\n[CPU / CUDA]", fillcolor = "#FFF3E0", color = "#FB8C00"]
+        llm [label = "Language Model\n(Gemma 4 / llama.cpp)\n[CPU / CUDA]", fillcolor = "#FFF3E0", color = "#FB8C00"]
         tts [label = "Text-to-Speech\n(Piper TTS / Norwegian Voice)", fillcolor = "#FFF3E0", color = "#FB8C00"]
     }
 

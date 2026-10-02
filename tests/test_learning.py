@@ -73,13 +73,18 @@ def test_optional_archive_crud_and_http_boundary(tmp_path):
         assert not store.path.exists()
         assert client.put(route, json=messages()).status_code == 403
         assert client.get("/api/chats").status_code == 403
-        assert client.put(route, json=messages(), headers={**headers, "Origin": "http://evil.example"}).status_code == 403
+        assert client.put(route, json=messages(),
+                          headers={**headers, "Origin": "http://evil.example"}).status_code == 403
         assert not store.path.exists()
-        for invalid in ([], messages()[:1], messages()[::-1], [{"role": "user", "content": "x" * 1001}, messages()[1]]):
+        for invalid in ([], messages()[:1], messages()[::-1],
+                        [{"role": "user", "content": "x" * 1001}, messages()[1]]):
             assert client.put(route, json=invalid, headers=headers).status_code == 400
-        assert client.put(route, content=b"{}", headers={**headers, "Content-Type": "text/plain"}).status_code == 415
-        assert client.put(route, content=b"x" * (MAX_CHAT_BYTES + 1), headers={**headers, "Content-Type": "application/json"}).status_code == 413
-        assert client.put(route, json=messages(source="audio"), headers=headers).json() == {"saved": True}
+        assert client.put(route, content=b"{}",
+                          headers={**headers, "Content-Type": "text/plain"}).status_code == 415
+        assert client.put(route, content=b"x" * (MAX_CHAT_BYTES + 1), headers={**headers,
+                                                                               "Content-Type": "application/json"}).status_code == 413
+        assert client.put(route, json=messages(source="audio"), headers=headers).json() == {
+            "saved": True}
         assert store.path.exists()
         assert client.get(route, headers=headers).json()["messages"] == messages(source="audio")
         listed = client.get("/api/chats", headers=headers).json()
@@ -108,9 +113,9 @@ def test_chat_validation_bounds_and_sources():
 @pytest.mark.parametrize("character", ["ø", "😀", "\x00"])
 def test_full_unicode_chat_save_restore_and_review(tmp_path, character):
     transcript = [
-        {"role": "user", "content": character * 1000, "source": "text"},
-        {"role": "assistant", "content": character * 4000, "source": "text"},
-    ] * 200
+                     {"role": "user", "content": character * 1000, "source": "text"},
+                     {"role": "assistant", "content": character * 4000, "source": "text"},
+                 ] * 200
     models = FakeModels()
 
     def review(messages, cancelled, emit, selection, context_tokens=None):
@@ -121,19 +126,23 @@ def test_full_unicode_chat_save_restore_and_review(tmp_path, character):
     models.review_turn = review
     headers = {"X-Pratevenn-Request": "1", "Origin": "http://127.0.0.1"}
     route = f"/api/chats/{uuid4()}"
-    with TestClient(create_app(models, ChatStore(tmp_path / "chats.sqlite3")), base_url="http://127.0.0.1") as client:
+    with TestClient(create_app(models, ChatStore(tmp_path / "chats.sqlite3")),
+                    base_url="http://127.0.0.1") as client:
         # Escaped non-BMP characters occupy twelve bytes per character in JSON.
         body = json.dumps(transcript).encode()
         assert len(body) > 1_400_000
-        assert client.put(route, content=body, headers={**headers, "Content-Type": "application/json"}).status_code == 200
+        assert client.put(route, content=body, headers={**headers,
+                                                        "Content-Type": "application/json"}).status_code == 200
         assert client.get(route, headers=headers).json()["messages"] == transcript
         with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as ws:
-            ws.send_text(json.dumps({"type": "review", "messages": transcript, "history": transcript}))
+            ws.send_text(
+                json.dumps({"type": "review", "messages": transcript, "history": transcript}))
             assert ws.receive_json() == {"type": "done", "review": True}
         with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as ws:
             ws.send_text(json.dumps({"type": "text", "text": "Hei", "history": transcript}))
             assert [ws.receive_json()["type"] for _ in range(3)] == ["transcript", "text", "done"]
-        assert models.histories[-1] == [{"role": m["role"], "content": m["content"]} for m in transcript]
+        assert models.histories[-1] == [{"role": m["role"], "content": m["content"]} for m in
+                                        transcript]
 
 
 def test_resume_and_review_are_connection_local(tmp_path):
@@ -167,7 +176,8 @@ def test_resume_and_review_are_connection_local(tmp_path):
         assert next_request.wait(2)
 
     models.review_turn = review
-    with TestClient(create_app(models, ChatStore(tmp_path / "chats.sqlite3")), base_url="http://127.0.0.1") as client:
+    with TestClient(create_app(models, ChatStore(tmp_path / "chats.sqlite3")),
+                    base_url="http://127.0.0.1") as client:
         headers = {"Origin": "http://127.0.0.1"}
         with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as ws:
             ws.send_json({"type": "review", "messages": messages()[:1]})
@@ -178,10 +188,12 @@ def test_resume_and_review_are_connection_local(tmp_path):
             assert ws.receive_json() == {"type": "done", "review": True}
             ws.send_json({"type": "text", "text": "Hei igjen"})
             assert [ws.receive_json()["type"] for _ in range(3)] == ["transcript", "text", "done"]
-            assert models.histories[0] == [{"role": m["role"], "content": m["content"]} for m in messages(2)]
+            assert models.histories[0] == [{"role": m["role"], "content": m["content"]} for m in
+                                           messages(2)]
             ws.send_json({"type": "text", "text": "Hei", "history": messages()})
             assert "Reopen" in ws.receive_json()["message"]
-            ws.send_json({"type": "review", "messages": messages(), "models": {"stt": "stt/second"}})
+            ws.send_json(
+                {"type": "review", "messages": messages(), "models": {"stt": "stt/second"}})
             assert "Stop" in ws.receive_json()["message"]
         with client.websocket_connect("ws://127.0.0.1/ws", headers=headers) as ws:
             ws.send_json({"type": "text", "text": "Hei"})
@@ -248,6 +260,7 @@ def test_review_batches_evidence_cancellation_and_lock_release():
     model.llm.create_completion = cancel_completion
     model.review_turn(transcript, cancelled, events.append, model.loaded)
     assert all(event["type"] == "status" for event in events)
+
     def complete_then_cancel(*args, **kwargs):
         yield {"choices": [{"text": "[]"}]}
         cancelled.set()
@@ -261,7 +274,8 @@ def test_review_batches_evidence_cancellation_and_lock_release():
 
     loaded_selections = []
     model.load = lambda selection, **kwargs: loaded_selections.append(selection)
-    model.prompt = lambda history, text, prompt: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
+    model.prompt = lambda history, text, prompt: ([1] * 10,
+                                                  SimpleNamespace(stop=[], stopping_criteria=None))
     model.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "[]"}]}])
     events.clear()
     model.review_turn(transcript[:2], threading.Event(), events.append, {"llm": "custom"})
@@ -277,15 +291,20 @@ def test_review_batches_evidence_cancellation_and_lock_release():
     with pytest.raises(ValueError, match="could not produce"):
         model.review_turn(transcript, threading.Event(), events.append, model.loaded)
     assert not model.lock.locked()
-    assert review_findings([finding(True), finding(category="invented"), finding(correction="I går jeg gikk")], messages(), 1, 1) == []
+    assert review_findings(
+        [finding(True), finding(category="invented"), finding(correction="I går jeg gikk")],
+        messages(), 1, 1) == []
     for invalid_review in ("not a list", [finding()] * 4):
         with pytest.raises(ValueError, match="invalid review"):
             review_findings(invalid_review, messages(), 1, 1)
     for invalid_item in (
-        ["not a dict"],
-        [{"turn": 1, "original": 123, "correction": "b", "category": "other", "explanation": "e"}],
-        [{"turn": 1, "original": "", "correction": "b", "category": "other", "explanation": "e"}],
-        [{"turn": 1, "original": "a" * 1001, "correction": "b", "category": "other", "explanation": "e"}],
+            ["not a dict"],
+            [{"turn": 1, "original": 123, "correction": "b", "category": "other",
+              "explanation": "e"}],
+            [{"turn": 1, "original": "", "correction": "b", "category": "other",
+              "explanation": "e"}],
+            [{"turn": 1, "original": "a" * 1001, "correction": "b", "category": "other",
+              "explanation": "e"}],
     ):
         with pytest.raises(ValueError, match="invalid suggestion"):
             review_findings(invalid_item, messages(), 1, 1)
@@ -308,9 +327,10 @@ def test_inline_findings_and_eval_turn():
     assert inline_findings([{**valid, "correction": valid["original"]}], text) == []
     assert inline_findings([valid, valid], text) == [valid]
     for invalid_detail in (
-        {"original": 123, "correction": "a", "category": "word_order", "explanation": "e"},
-        {"original": "", "correction": "a", "category": "word_order", "explanation": "e"},
-        {"original": "a" * 501, "correction": "a", "category": "word_order", "explanation": "e"},
+            {"original": 123, "correction": "a", "category": "word_order", "explanation": "e"},
+            {"original": "", "correction": "a", "category": "word_order", "explanation": "e"},
+            {"original": "a" * 501, "correction": "a", "category": "word_order",
+             "explanation": "e"},
     ):
         assert inline_findings([invalid_detail], text) == []
 

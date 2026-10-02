@@ -8,7 +8,9 @@
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/UrukiApp/pratevenn/tests.yml?label=tests&style=flat&labelColor=282c34&logo=github)](https://github.com/UrukiApp/pratevenn/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/license-MIT-007ec6?style=flat&labelColor=282c34&logo=open-source-initiative)](LICENSE)
-[![Container Images](https://img.shields.io/github/v/tag/UrukiApp/pratevenn?label=ghcr.io&style=flat&labelColor=282c34&logo=docker&color=507ec6&sort=semver)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn)
+[![GHCR CPU](https://img.shields.io/badge/ghcr.io-CPU-507ec6?style=flat&labelColor=282c34&logo=docker)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cpu)
+[![GHCR CUDA](https://img.shields.io/badge/ghcr.io-CUDA-507ec6?style=flat&labelColor=282c34&logo=docker)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cuda)
+[![Release](https://img.shields.io/github/v/release/UrukiApp/pratevenn?include_prereleases&label=release&style=flat&labelColor=282c34&logo=github&sort=semver)](https://github.com/UrukiApp/pratevenn/releases)
 
 A private, local conversational AI tool for Norwegian language learners
 
@@ -17,11 +19,6 @@ A private, local conversational AI tool for Norwegian language learners
 ---
 
 Pratevenn lets you practice speaking Norwegian with an AI on your own computer while everything stays on your machine.
-
-<br>
-<div align="center">
-  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
-</div>
 
 ### Key Features
 
@@ -32,11 +29,13 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 
 > [!IMPORTANT]
 > Pratevenn is in early development, so bugs and breaking changes are expected.
-> Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
+> Please use the [issues page](https://github.com/UrukiApp/pratevenn/issues) to report bugs or request features.
 
 ---
 
 ### Getting Started
+
+Before you begin, make sure you have [Docker](https://docs.docker.com/get-docker/) (with Compose V2) installed on your system.
 
 #### Running with Docker Compose
 
@@ -47,29 +46,31 @@ Use the included [compose.yaml](compose.yaml), or save the text below as `compos
 ```yaml
 services:
     pratevenn:
-        image: ghcr.io/urukiapp/pratevenn:latest-cpu
+        image: ghcr.io/urukiapp/pratevenn-cpu:${PRATEVENN_VERSION:-latest}
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0
-            - PRATEVENN_ALLOWED_HOSTS=*
+            - PRATEVENN_DATA_DIR=/data
         ports:
-            - "8000:8000"
+            - "127.0.0.1:${PORT:-8000}:8000"
         volumes:
             - models:/models
+            - data:/data
         restart: unless-stopped
 
     pratevenn-cuda:
-        image: ghcr.io/urukiapp/pratevenn:latest-cuda
+        image: ghcr.io/urukiapp/pratevenn-cuda:${PRATEVENN_VERSION:-latest}
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0
-            - PRATEVENN_ALLOWED_HOSTS=*
+            - PRATEVENN_DATA_DIR=/data
             - NVIDIA_VISIBLE_DEVICES=all
             - NVIDIA_DRIVER_CAPABILITIES=compute,utility
         ports:
-            - "8000:8000"
+            - "127.0.0.1:${PORT:-8000}:8000"
         volumes:
             - models:/models
+            - data:/data
         deploy:
             resources:
                 reservations:
@@ -82,7 +83,10 @@ services:
         restart: unless-stopped
 
 volumes:
+    data:
+        driver: local
     models:
+        driver: local
 ```
 
 ##### 2. Download the Models
@@ -111,11 +115,17 @@ docker compose --profile cuda up -d pratevenn-cuda
 ```
 
 > [!IMPORTANT]
-> Using the CUDA image is the recommended way of running Pratevenn.
+> Using the CUDA image (using an NVIDIA GPU with 8GB of VRAM or more) is the recommended way of running Pratevenn.
 > Note that normally on Linux you need to have
 the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed.
 
 Open <http://localhost:8000> in your browser and click *Start conversation*.
+
+
+<br>
+<div align="center">
+  <img alt="UI" src="docs/assets/screenshots/ui-v0.1.0a2-1.png" width="99%">
+</div>
 
 #### Managing Pratevenn Container
 
@@ -125,7 +135,7 @@ Use standard Docker Compose commands to manage Pratevenn:
 docker compose up -d                    # Start Pratevenn
 docker compose stop                     # Stop Pratevenn (keeps your models and data)
 docker compose down                     # Remove containers
-docker compose down -v                  # Remove containers (and downloaded models)
+docker compose down -v                  # Remove containers (with downloaded models and saved chats)
 docker compose logs -f                  # Check the logs
 ```
 
@@ -153,7 +163,7 @@ Additionally, Pratevenn uses the following open-source projects and models for i
 
 - [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
-- [Gemma models](https://ai.google.dev/gemma) for the conversation and reviewing the chat.
+- [Gemma 4 models](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/) for the conversation and reviewing the chat.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and
   GPU.
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) for speech-to-text transcription.
