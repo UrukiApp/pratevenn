@@ -45,6 +45,13 @@ sudo apt-get install make
 - Run `make install` (or `make setup`) to create the environment and install the locked application and development dependencies.
 - Run `make models` once to download model weights, then `make run` to start Pratevenn.
 
+> [!NOTE]
+> Local CUDA builds require the CUDA 12.5 toolkit, including `nvcc`, and a compatible C++ compiler.
+> Use `make install CUDA=0` for CPU development, or `make install CUDA=1` to build with CUDA.
+> The CUDA Docker build includes its own toolkit.
+> It uses two compiler jobs by default; larger machines can increase the
+> `CMAKE_BUILD_PARALLEL_LEVEL` Docker build argument.
+
 #### Code Style
 
 - Use the `make format` command to format the code.

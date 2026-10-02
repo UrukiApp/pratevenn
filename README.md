@@ -161,7 +161,7 @@ The logo is generated with the help of [ChatGPT](https://chatgpt.com/).
 
 Additionally, Pratevenn uses the following open-source projects and models for its core functionality:
 
-- [NB-Whisper](https://github.com/NbAiLab/nb-whisper) for Norwegian speech recognition.
+- [NB-Whisper](https://huggingface.co/NbAiLab/nb-whisper-large) for Norwegian speech recognition.
 - [Piper](https://github.com/OHF-Voice/piper1-gpl) for text-to-speech synthesis.
 - [Gemma 4 models](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/) for the conversation and reviewing the chat.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) and [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) for inference on CPU and

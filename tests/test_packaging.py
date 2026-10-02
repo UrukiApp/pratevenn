@@ -67,7 +67,7 @@ def test_locked_backends_are_portable(extra, tmp_path):
             assert len(backends) == 1
             if cuda:
                 assert "index" not in backends[0]
-                assert "/v0.3.35-cu125/" in backends[0]["archive"]["url"]
+                assert backends[0]["archive"]["url"].endswith("/llama_cpp_python-0.3.36.tar.gz")
                 assert backends[0]["archive"]["hashes"]["sha256"]
             else:
                 assert backends[0]["index"] == "https://pypi.org/simple"

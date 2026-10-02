@@ -1,6 +1,6 @@
 [project]
 name = "pratevenn"
-version = "0.1.0-alpha.5"
+version = "0.1.0-alpha.6"
 description = "A local conversational AI tool for Norwegian language learners"
 readme = "README.md"
 license = { text = "MIT" }
@@ -40,7 +40,7 @@ dependencies = [
 [project.optional-dependencies]
 cpu = ["llama-cpp-python>=0.3.35"]
 cuda = [
-    "llama-cpp-python>=0.3.35",
+    "llama-cpp-python==0.3.36",
     "nvidia-cublas-cu12>=12.5,<12.6; sys_platform == 'linux' and platform_machine == 'x86_64'",
     "nvidia-cuda-runtime-cu12>=12.5,<12.6; sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
@@ -67,7 +67,7 @@ conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
 [tool.uv.sources]
 llama-cpp-python = [
     { index = "pypi", extra = "cpu" },
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl", extra = "cuda", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+    { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz", extra = "cuda", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
     { index = "pypi", extra = "cuda", marker = "sys_platform != 'linux' or platform_machine != 'x86_64'" },
 ]
 
