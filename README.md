@@ -8,7 +8,7 @@
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/UrukiApp/pratevenn/tests.yml?label=tests&style=flat&labelColor=282c34&logo=github)](https://github.com/UrukiApp/pratevenn/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/license-MIT-007ec6?style=flat&labelColor=282c34&logo=open-source-initiative)](LICENSE)
-[![Container Images](https://img.shields.io/github/v/tag/UrukiApp/pratevenn?label=ghcr.io&style=flat&labelColor=282c34&logo=docker&color=507ec6&sort=semver)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn)
+[![Container Images](https://img.shields.io/github/v/tag/UrukiApp/pratevenn?label=ghcr.io&style=flat&labelColor=282c34&logo=docker&color=507ec6&sort=semver)](https://github.com/UrukiApp/pratevenn/packages)
 
 A private, local conversational AI tool for Norwegian language learners
 
@@ -37,6 +37,14 @@ Before you begin, make sure you have [Docker](https://docs.docker.com/get-docker
 
 #### Running with Docker Compose
 
+CPU and CUDA images are published as separate packages:
+[pratevenn-cpu](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cpu) and
+[pratevenn-cuda](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cuda).
+Both images support Linux on x86-64.
+Each release has its Git tag, such as `v0.1.0-alpha.5`, and updates `latest`, including alpha releases.
+With the included Compose file, set `PRATEVENN_VERSION` to a release tag to pin both images.
+Existing tags in the old `pratevenn` package remain available, but new releases use the separate packages.
+
 ##### 1. Compose Configuration
 
 Use the included [compose.yaml](compose.yaml), or save the text below as `compose.yaml`:
@@ -44,7 +52,7 @@ Use the included [compose.yaml](compose.yaml), or save the text below as `compos
 ```yaml
 services:
     pratevenn:
-        image: ghcr.io/urukiapp/pratevenn:latest-cpu
+        image: ghcr.io/urukiapp/pratevenn-cpu:latest
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0
@@ -56,7 +64,7 @@ services:
         restart: unless-stopped
 
     pratevenn-cuda:
-        image: ghcr.io/urukiapp/pratevenn:latest-cuda
+        image: ghcr.io/urukiapp/pratevenn-cuda:latest
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0

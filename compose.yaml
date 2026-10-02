@@ -1,6 +1,6 @@
 services:
   pratevenn:
-    image: ghcr.io/urukiapp/pratevenn:${PRATEVENN_VERSION:-latest}-cpu
+    image: ghcr.io/urukiapp/pratevenn-cpu:${PRATEVENN_VERSION:-latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,11 +17,10 @@ services:
     restart: unless-stopped
 
   pratevenn-cuda:
-    image: ghcr.io/urukiapp/pratevenn:${PRATEVENN_VERSION:-latest}-cuda
+    image: ghcr.io/urukiapp/pratevenn-cuda:${PRATEVENN_VERSION:-latest}
     build:
       context: .
-      dockerfile: Dockerfile
-      target: cuda
+      dockerfile: Dockerfile.cuda
     environment:
       - PRATEVENN_MODEL_DIR=/models
       - PRATEVENN_HOST=0.0.0.0
