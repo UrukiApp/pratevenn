@@ -35,7 +35,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 
 ### Getting Started
 
-Before you begin, make sure you have [Docker](https://docs.docker.com/get-docker/), with Compose V2, installed on your system.
+Before you begin, make sure you have [Docker](https://docs.docker.com/get-docker/) (with Compose V2) installed on your system.
 
 #### Running with Docker Compose
 
