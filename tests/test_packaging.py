@@ -10,7 +10,8 @@ from packaging.markers import Marker
 
 def test_cuda_compose_target_selects_only_cuda_service():
     result = subprocess.run(
-        ["make", "--no-print-directory", "-n", "compose-up-cuda", "COMPOSE=docker compose", "CUDA=0"],
+        ["make", "--no-print-directory", "-n", "compose-up-cuda", "COMPOSE=docker compose",
+         "CUDA=0"],
         cwd=Path(__file__).resolve().parents[1],
         capture_output=True,
         text=True,
@@ -44,11 +45,11 @@ def test_locked_backends_are_portable(extra, tmp_path):
     packages = tomllib.loads(result.stdout)["packages"]
     for version in ("3.11", "3.12", "3.13", "3.14"):
         for platform, machine in (
-            ("linux", "x86_64"),
-            ("linux", "aarch64"),
-            ("darwin", "arm64"),
-            ("darwin", "x86_64"),
-            ("win32", "AMD64"),
+                ("linux", "x86_64"),
+                ("linux", "aarch64"),
+                ("darwin", "arm64"),
+                ("darwin", "x86_64"),
+                ("win32", "AMD64"),
         ):
             environment = {
                 "sys_platform": platform,

@@ -41,7 +41,6 @@ services:
               capabilities: [gpu]
     profiles:
       - cuda
-      - gpu
     restart: unless-stopped
 
 volumes:

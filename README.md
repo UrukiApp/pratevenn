@@ -29,7 +29,7 @@ Pratevenn lets you practice speaking Norwegian with an AI on your own computer w
 
 > [!IMPORTANT]
 > Pratevenn is in early development, so bugs and breaking changes are expected.
-> Please use the [issues page](https://github.com/CogitatorTech/pratevenn/issues) to report bugs or request features.
+> Please use the [issues page](https://github.com/UrukiApp/pratevenn/issues) to report bugs or request features.
 
 ---
 
@@ -46,29 +46,31 @@ Use the included [compose.yaml](compose.yaml), or save the text below as `compos
 ```yaml
 services:
     pratevenn:
-        image: ghcr.io/urukiapp/pratevenn-cpu:latest
+        image: ghcr.io/urukiapp/pratevenn-cpu:${PRATEVENN_VERSION:-latest}
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0
-            - PRATEVENN_ALLOWED_HOSTS=*
+            - PRATEVENN_DATA_DIR=/data
         ports:
-            - "8000:8000"
+            - "127.0.0.1:${PORT:-8000}:8000"
         volumes:
             - models:/models
+            - data:/data
         restart: unless-stopped
 
     pratevenn-cuda:
-        image: ghcr.io/urukiapp/pratevenn-cuda:latest
+        image: ghcr.io/urukiapp/pratevenn-cuda:${PRATEVENN_VERSION:-latest}
         environment:
             - PRATEVENN_MODEL_DIR=/models
             - PRATEVENN_HOST=0.0.0.0
-            - PRATEVENN_ALLOWED_HOSTS=*
+            - PRATEVENN_DATA_DIR=/data
             - NVIDIA_VISIBLE_DEVICES=all
             - NVIDIA_DRIVER_CAPABILITIES=compute,utility
         ports:
-            - "8000:8000"
+            - "127.0.0.1:${PORT:-8000}:8000"
         volumes:
             - models:/models
+            - data:/data
         deploy:
             resources:
                 reservations:
@@ -81,7 +83,10 @@ services:
         restart: unless-stopped
 
 volumes:
+    data:
+        driver: local
     models:
+        driver: local
 ```
 
 ##### 2. Download the Models
@@ -130,7 +135,7 @@ Use standard Docker Compose commands to manage Pratevenn:
 docker compose up -d                    # Start Pratevenn
 docker compose stop                     # Stop Pratevenn (keeps your models and data)
 docker compose down                     # Remove containers
-docker compose down -v                  # Remove containers (and downloaded models)
+docker compose down -v                  # Remove containers (with downloaded models and saved chats)
 docker compose logs -f                  # Check the logs
 ```
 

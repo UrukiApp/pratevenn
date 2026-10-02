@@ -6,12 +6,14 @@ on:
   pull_request:
     branches:
       - main
+      - develop
     paths-ignore:
       - '**.md'
       - 'docs/**'
   push:
     branches:
       - main
+      - develop
     tags:
       - "v*"
 

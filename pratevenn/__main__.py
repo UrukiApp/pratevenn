@@ -12,7 +12,7 @@ def main() -> None:
         description="Pratevenn: a local Norwegian conversation practice tool"
     )
     commands = parser.add_subparsers(dest="command", required=True)
-    setup = commands.add_parser("setup", help="Download the three local models")
+    setup = commands.add_parser("setup", help="Download local models")
     setup.add_argument("--full", action="store_true", help="Download all bundled options")
     setup.add_argument(
         "--semantic",

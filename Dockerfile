@@ -1,8 +1,4 @@
 # syntax=docker/dockerfile:1
-
-# ------------------------------------------------------------------------------
-# Base builder stage: uv package manager
-# ------------------------------------------------------------------------------
 FROM python:3.14-slim-trixie AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
@@ -23,10 +19,6 @@ ENV UV_LINK_MODE=copy \
 
 COPY pyproject.toml uv.lock .python-version ./
 
-# ------------------------------------------------------------------------------
-# CPU builder stage
-# ------------------------------------------------------------------------------
-FROM builder AS build-cpu
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --extra cpu --no-install-project
 
@@ -35,10 +27,7 @@ COPY pratevenn/ ./pratevenn/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --extra cpu
 
-# ------------------------------------------------------------------------------
-# Runtime base stage
-# ------------------------------------------------------------------------------
-FROM python:3.14-slim-trixie AS runtime-base
+FROM python:3.14-slim-trixie AS cpu
 
 RUN apt-get update \
     && apt-get install --no-install-recommends --yes \
@@ -54,6 +43,10 @@ RUN apt-get update \
 
 WORKDIR /app
 
+COPY --from=builder --chown=pratevenn:pratevenn /app/.venv /app/.venv
+COPY --from=builder --chown=pratevenn:pratevenn /app/pratevenn /app/pratevenn
+COPY --from=builder --chown=pratevenn:pratevenn /app/pyproject.toml /app/pyproject.toml
+
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PRATEVENN_MODEL_DIR=/models \
@@ -62,14 +55,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 EXPOSE 8000
 VOLUME ["/models", "/data"]
-
-# ------------------------------------------------------------------------------
-# Target: CPU
-# ------------------------------------------------------------------------------
-FROM runtime-base AS cpu
-COPY --from=build-cpu --chown=pratevenn:pratevenn /app/.venv /app/.venv
-COPY --from=build-cpu --chown=pratevenn:pratevenn /app/pratevenn /app/pratevenn
-COPY --from=build-cpu --chown=pratevenn:pratevenn /app/pyproject.toml /app/pyproject.toml
 
 USER pratevenn
 ENTRYPOINT ["pratevenn"]

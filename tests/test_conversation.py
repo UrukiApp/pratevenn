@@ -113,12 +113,12 @@ def test_audio_trust_boundary():
         with pytest.raises(ValueError):
             validate_audio(invalid)
     for message in (
-        {"type": "audio", "data": "not base64"},
-        {"type": "audio", "data": 123},
-        {"type": "audio", "data": "A" * (MAX_AUDIO_BYTES * 4 // 3 + 5)},
-        {"type": "unknown"},
-        {"type": "text", "text": " "},
-        {"type": "text", "text": "x" * 1001},
+            {"type": "audio", "data": "not base64"},
+            {"type": "audio", "data": 123},
+            {"type": "audio", "data": "A" * (MAX_AUDIO_BYTES * 4 // 3 + 5)},
+            {"type": "unknown"},
+            {"type": "text", "text": " "},
+            {"type": "text", "text": "x" * 1001},
     ):
         with pytest.raises(ValueError):
             parse_turn(message)
@@ -259,11 +259,11 @@ def test_system_prompt_validation_and_connection_isolation():
                 assert "system prompt" in ws.receive_json()["message"]
             assert not models.entered.is_set()
             for prompt, payload in (
-                ("Snakk om mat.", {"type": "text", "text": "Hei"}),
-                (
-                    "Snakk om været.",
-                    {"type": "audio", "data": base64.b64encode(recording()).decode()},
-                ),
+                    ("Snakk om mat.", {"type": "text", "text": "Hei"}),
+                    (
+                            "Snakk om været.",
+                            {"type": "audio", "data": base64.b64encode(recording()).decode()},
+                    ),
             ):
                 ws.send_json({**payload, "system_prompt": prompt})
                 assert [ws.receive_json()["type"] for _ in range(3)] == [
@@ -289,14 +289,14 @@ def test_system_prompt_validation_and_connection_isolation():
 def test_downloaded_models_and_session_selection(tmp_path):
     root = tmp_path / "models"
     for name in (
-        "stt/complete/model.bin",
-        "stt/complete/config.json",
-        "stt/complete/tokenizer.json",
-        "stt/incomplete/model.bin",
-        "llm/first.gguf",
-        "tts/voice.onnx",
-        "tts/voice.onnx.json",
-        "tts/incomplete.onnx",
+            "stt/complete/model.bin",
+            "stt/complete/config.json",
+            "stt/complete/tokenizer.json",
+            "stt/incomplete/model.bin",
+            "llm/first.gguf",
+            "tts/voice.onnx",
+            "tts/voice.onnx.json",
+            "tts/incomplete.onnx",
     ):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -317,14 +317,15 @@ def test_downloaded_models_and_session_selection(tmp_path):
     assert first.relative_to(root).as_posix() not in discover_models(root)["llm"]
     second.unlink()
     second.touch()
-    assert list(discover_models(root)["llm"]) == ["llm/first.gguf", first.relative_to(root).as_posix()]
+    assert list(discover_models(root)["llm"]) == ["llm/first.gguf",
+                                                  first.relative_to(root).as_posix()]
 
     models = FakeModels()
     for invalid in (
-        {"llm": "../../outside.gguf"},
-        {"tts": []},
-        {"url": "https://example.com"},
-        None,
+            {"llm": "../../outside.gguf"},
+            {"tts": []},
+            {"url": "https://example.com"},
+            None,
     ):
         with pytest.raises(ValueError):
             models.selection(invalid)
@@ -359,7 +360,8 @@ def test_cuda_runtime_library_order_and_optional_install(monkeypatch, tmp_path):
         lambda name: SimpleNamespace(locate_file=lambda library: tmp_path / library),
     )
     loaded = []
-    monkeypatch.setattr("pratevenn.models.ctypes.CDLL", lambda path, mode: loaded.append(Path(path).name))
+    monkeypatch.setattr("pratevenn.models.ctypes.CDLL",
+                        lambda path, mode: loaded.append(Path(path).name))
     load_cuda_runtime()
     assert loaded == ["libcudart.so.12", "libcublasLt.so.12", "libcublas.so.12"]
 
@@ -538,9 +540,9 @@ def test_download_profiles_and_full_cli(tmp_path, monkeypatch):
 
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", local_download)
     for full, semantic, counts in (
-        (False, False, (1, 1, 1)),
-        (True, False, (3, 2, 2)),
-        (False, True, (4, 1, 1)),
+            (False, False, (1, 1, 1)),
+            (True, False, (3, 2, 2)),
+            (False, True, (4, 1, 1)),
     ):
         root = tmp_path / f"{full}-{semantic}"
         download_models(root, full=full, semantic=semantic)
@@ -601,12 +603,12 @@ def test_start_cli_and_argument_validation(tmp_path, monkeypatch):
     assert loads == [(tmp_path, 2, -1, 8192)]
     assert servers == [{"host": "127.0.0.1", "port": 9000, "ws_max_size": MAX_MESSAGE_BYTES}]
     for flag, value in (
-        ("--port", "0"),
-        ("--port", "65536"),
-        ("--threads", "0"),
-        ("--gpu-layers", "-2"),
-        ("--context-size", "512"),
-        ("--context-size", "70000"),
+            ("--port", "0"),
+            ("--port", "65536"),
+            ("--threads", "0"),
+            ("--gpu-layers", "-2"),
+            ("--context-size", "512"),
+            ("--context-size", "70000"),
     ):
         monkeypatch.setattr("sys.argv", ["pratevenn", "start", flag, value])
         with pytest.raises(SystemExit) as error:
@@ -933,7 +935,8 @@ def test_run_turn_branches_and_cancellation():
         return recording()
 
     models.speak = cancel_after_pending_speak
-    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Uten tegnsetting"}]}])
+    models.llm.create_completion = lambda *a, **kw: iter(
+        [{"choices": [{"text": "Uten tegnsetting"}]}])
     events.clear()
     cancelled.clear()
     models.run_turn("Hei", None, [], cancelled, events.append)
@@ -946,14 +949,16 @@ def test_run_turn_branches_and_cancellation():
         return recording()
 
     models.speak = speak_without_kwargs
-    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Uten tegnsetting"}]}])
+    models.llm.create_completion = lambda *a, **kw: iter(
+        [{"choices": [{"text": "Uten tegnsetting"}]}])
     events.clear()
     models.run_turn("Hei", None, [], threading.Event(), events.append)
     assert any(event.get("type") == "audio" for event in events)
     assert events[-1]["type"] == "done"
 
     models.speak = speak_without_kwargs
-    models.llm.create_completion = lambda *a, **kw: iter([{"choices": [{"text": "Med tegn. En til! "}]}])
+    models.llm.create_completion = lambda *a, **kw: iter(
+        [{"choices": [{"text": "Med tegn. En til! "}]}])
     events.clear()
     models.run_turn("Hei", None, [], threading.Event(), events.append)
     assert sum(1 for e in events if e.get("type") == "audio") == 2
