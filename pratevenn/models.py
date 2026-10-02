@@ -1,4 +1,4 @@
-"""The prototype's three local models and their explicit download step."""
+"""The models and their explicit download step."""
 
 from __future__ import annotations
 
