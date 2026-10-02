@@ -15,16 +15,18 @@ WORKDIR /app
 
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never
+    UV_PYTHON_DOWNLOADS=never \
+    CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON -DCMAKE_INSTALL_BINDIR=llama_cpp/lib"
 
 COPY pyproject.toml uv.lock .python-version ./
 
-RUN --mount=type=cache,target=/root/.cache/uv \
+# Keep previously cached native wheels out of the portable build.
+RUN --mount=type=cache,id=pratevenn-cpu-portable,target=/root/.cache/uv \
     uv sync --locked --no-dev --extra cpu --no-install-project
 
 COPY README.md ./
 COPY pratevenn/ ./pratevenn/
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=pratevenn-cpu-portable,target=/root/.cache/uv \
     uv sync --locked --no-dev --extra cpu
 
 FROM python:3.14-slim-trixie AS cpu
@@ -46,6 +48,9 @@ WORKDIR /app
 COPY --from=builder --chown=pratevenn:pratevenn /app/.venv /app/.venv
 COPY --from=builder --chown=pratevenn:pratevenn /app/pratevenn /app/pratevenn
 COPY --from=builder --chown=pratevenn:pratevenn /app/pyproject.toml /app/pyproject.toml
+
+# ggml searches beside the Python executable for dynamic CPU backends.
+RUN ln -s /app/.venv/lib/python3.14/site-packages/llama_cpp/lib/libggml-cpu-*.so /usr/local/bin/
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \

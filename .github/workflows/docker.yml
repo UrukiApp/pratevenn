@@ -83,6 +83,30 @@ jobs:
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Build the CPU image for portability testing
+        if: matrix.name == 'pratevenn-cpu'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          target: cpu
+          platforms: linux/amd64
+          load: true
+          tags: pratevenn:cpu-test
+          cache-from: type=gha,scope=${{ matrix.name }}
+
+      - name: Test the CPU backend without AVX
+        if: matrix.name == 'pratevenn-cpu'
+        timeout-minutes: 2
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes qemu-user-static
+          docker run --rm --network none --platform linux/amd64 \
+            -v /usr/bin/qemu-x86_64-static:/qemu-x86_64-static:ro \
+            --entrypoint /qemu-x86_64-static pratevenn:cpu-test \
+            -cpu Nehalem /app/.venv/bin/python -c \
+            'import llama_cpp; llama_cpp.llama_backend_init(); info = llama_cpp.llama_print_system_info().decode(); print(info); assert "CPU :" in info'
+
       - name: Build and push the ${{ matrix.name }} image
         uses: docker/build-push-action@v7
         with:
