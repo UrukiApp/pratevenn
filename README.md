@@ -37,14 +37,6 @@ Before you begin, make sure you have [Docker](https://docs.docker.com/get-docker
 
 #### Running with Docker Compose
 
-CPU and CUDA images are published as separate packages:
-[pratevenn-cpu](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cpu) and
-[pratevenn-cuda](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cuda).
-Both images support Linux on x86-64.
-Each release has its Git tag, such as `v0.1.0-alpha.5`, and updates `latest`, including alpha releases.
-With the included Compose file, set `PRATEVENN_VERSION` to a release tag to pin both images.
-Existing tags in the old `pratevenn` package remain available, but new releases use the separate packages.
-
 ##### 1. Compose Configuration
 
 Use the included [compose.yaml](compose.yaml), or save the text below as `compose.yaml`:
