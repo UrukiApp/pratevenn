@@ -3,6 +3,10 @@ MODEL_DIR   ?= .models
 CUDA        ?= $(shell if [ "$$(uname -sm)" = "Linux x86_64" ] && nvidia-smi -L >/dev/null 2>&1; then echo 1; else echo 0; fi)
 UV_EXTRA     = --extra $(if $(filter 1,$(CUDA)),cuda,cpu) --extra dev
 
+ifeq ($(CUDA),1)
+export CMAKE_ARGS ?= -DGGML_CUDA=ON -DGGML_NATIVE=OFF
+endif
+
 CACHE_DIRS  = .mypy_cache .pytest_cache .ruff_cache
 COVERAGE    = .coverage htmlcov coverage.xml
 DIST_DIRS   = dist junit

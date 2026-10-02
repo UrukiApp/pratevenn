@@ -797,8 +797,29 @@ wheels = [
 
 [[package]]
 name = "llama-cpp-python"
-version = "0.3.35"
-source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl" }
+version = "0.3.36"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "(python_full_version >= '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version >= '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
+    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
+    "python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+    "python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+    "python_full_version < '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+]
+dependencies = [
+    { name = "diskcache", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
+    { name = "jinja2", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine != 'x86_64') or (python_full_version < '3.12' and sys_platform != 'linux') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version < '3.12' and extra != 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine != 'x86_64') or (python_full_version >= '3.12' and sys_platform != 'linux') or (python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "typing-extensions", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz", hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e", size = 76589250, upload-time = "2026-10-01T05:48:01.345Z" }
+
+[[package]]
+name = "llama-cpp-python"
+version = "0.3.36"
+source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }
 resolution-markers = [
     "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
     "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
@@ -810,9 +831,7 @@ dependencies = [
     { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
 ]
-wheels = [
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl", hash = "sha256:3b12c0188e1d90880d59645fd026e262f0f828ae5078df2a4a44a4801ea059d2" },
-]
+sdist = { hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e" }
 
 [package.metadata]
 requires-dist = [
@@ -844,27 +863,6 @@ requires-dist = [
     { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.22.0" },
 ]
 provides-extras = ["server", "test", "dev", "all"]
-
-[[package]]
-name = "llama-cpp-python"
-version = "0.3.36"
-source = { registry = "https://pypi.org/simple" }
-resolution-markers = [
-    "(python_full_version >= '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version >= '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
-    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
-    "python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-    "python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-    "python_full_version < '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-]
-dependencies = [
-    { name = "diskcache", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
-    { name = "jinja2", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine != 'x86_64') or (python_full_version < '3.12' and sys_platform != 'linux') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version < '3.12' and extra != 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine != 'x86_64') or (python_full_version >= '3.12' and sys_platform != 'linux') or (python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "typing-extensions", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz", hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e", size = 76589250, upload-time = "2026-10-01T05:48:01.345Z" }
 
 [[package]]
 name = "markdown"
@@ -1448,8 +1446,8 @@ dependencies = [
     { name = "fastapi" },
     { name = "faster-whisper" },
     { name = "huggingface-hub" },
-    { name = "llama-cpp-python", version = "0.3.35", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "piper-tts" },
     { name = "uvicorn" },
     { name = "websockets" },
@@ -1460,8 +1458,8 @@ cpu = [
     { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" } },
 ]
 cuda = [
-    { name = "llama-cpp-python", version = "0.3.35", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "nvidia-cublas-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
@@ -1486,8 +1484,8 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.28,<1" },
     { name = "huggingface-hub", specifier = ">=0.34,<2" },
     { name = "llama-cpp-python", specifier = ">=0.3.35" },
-    { name = "llama-cpp-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'cuda'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.35-cu125/llama_cpp_python-0.3.35-py3-none-manylinux_2_35_x86_64.whl" },
-    { name = "llama-cpp-python", marker = "(platform_machine != 'x86_64' and extra == 'cuda') or (sys_platform != 'linux' and extra == 'cuda')", specifier = ">=0.3.35", index = "https://pypi.org/simple", conflict = { package = "pratevenn", extra = "cuda" } },
+    { name = "llama-cpp-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'cuda'", url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" },
+    { name = "llama-cpp-python", marker = "(platform_machine != 'x86_64' and extra == 'cuda') or (sys_platform != 'linux' and extra == 'cuda')", specifier = "==0.3.36", index = "https://pypi.org/simple", conflict = { package = "pratevenn", extra = "cuda" } },
     { name = "llama-cpp-python", marker = "extra == 'cpu'", specifier = ">=0.3.35", index = "https://pypi.org/simple", conflict = { package = "pratevenn", extra = "cpu" } },
     { name = "mkdocs", marker = "extra == 'dev'", specifier = ">=1.6.1" },
     { name = "mkdocs-material", marker = "extra == 'dev'", specifier = ">=9.6.12" },
