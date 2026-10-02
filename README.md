@@ -8,7 +8,9 @@
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/UrukiApp/pratevenn/tests.yml?label=tests&style=flat&labelColor=282c34&logo=github)](https://github.com/UrukiApp/pratevenn/actions/workflows/tests.yml)
 [![License](https://img.shields.io/badge/license-MIT-007ec6?style=flat&labelColor=282c34&logo=open-source-initiative)](LICENSE)
-[![Container Images](https://img.shields.io/github/v/tag/UrukiApp/pratevenn?label=ghcr.io&style=flat&labelColor=282c34&logo=docker&color=507ec6&sort=semver)](https://github.com/UrukiApp/pratevenn/packages)
+[![GHCR CPU](https://img.shields.io/badge/ghcr.io-CPU-507ec6?style=flat&labelColor=282c34&logo=docker)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cpu)
+[![GHCR CUDA](https://img.shields.io/badge/ghcr.io-CUDA-76b900?style=flat&labelColor=282c34&logo=docker)](https://github.com/UrukiApp/pratevenn/pkgs/container/pratevenn-cuda)
+[![Release](https://img.shields.io/github/v/release/UrukiApp/pratevenn?include_prereleases&label=release&style=flat&labelColor=282c34&logo=github&sort=semver)](https://github.com/UrukiApp/pratevenn/releases)
 
 A private, local conversational AI tool for Norwegian language learners
 
