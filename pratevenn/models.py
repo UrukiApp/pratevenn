@@ -676,7 +676,11 @@ class Models:
                     language="no",
                     beam_size=1,
                     vad_filter=True,
-                    vad_parameters={"threshold": 0.7, "min_speech_duration_ms": 200},
+                    vad_parameters={
+                        "threshold": 0.7,
+                        "min_speech_duration_ms": 200,
+                        "min_silence_duration_ms": 200,
+                    },
                     condition_on_previous_text=False,
                 )
                 text = capitalize_first(

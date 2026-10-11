@@ -258,7 +258,11 @@ def test_uncertain_audio_does_not_start_conversation(no_speech_prob, avg_logprob
     class NoiseRecognizer:
         def transcribe(self, *args, **kwargs):
             assert kwargs["vad_filter"] is True
-            assert kwargs["vad_parameters"] == {"threshold": 0.7, "min_speech_duration_ms": 200}
+            assert kwargs["vad_parameters"] == {
+                "threshold": 0.7,
+                "min_speech_duration_ms": 200,
+                "min_silence_duration_ms": 200,
+            }
             return [
                 SimpleNamespace(
                     text="Takk for at du så på!",
@@ -272,6 +276,34 @@ def test_uncertain_audio_does_not_start_conversation(no_speech_prob, avg_logprob
     models.run_turn(None, recording(), [], threading.Event(), events.append)
     assert events[-1] == {"type": "done", "empty": True}
     assert not any(event["type"] in {"transcript", "text", "audio"} for event in events)
+    assert not models.lock.locked()
+
+
+def test_brief_noise_with_trailing_silence_is_rejected(monkeypatch):
+    import numpy as np
+    from faster_whisper import vad
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+
+    class NoiseRecognizer:
+        def transcribe(self, *args, **kwargs):
+            options = vad.VadOptions(**kwargs["vad_parameters"])
+            for windows, expected_speech in [(3, False), (8, True)]:
+                # Each window is 32 ms; the browser retains about 350 ms of silence.
+                probabilities = np.array([0.9] * windows + [0.1] * 11)
+                monkeypatch.setattr(vad, "get_vad_model", lambda: lambda audio: probabilities)
+                audio = np.zeros(len(probabilities) * 512, dtype=np.float32)
+                assert bool(vad.get_speech_timestamps(audio, options)) == expected_speech
+            return iter([]), None
+
+    models.stt = NoiseRecognizer()
+    history = [{"role": "user", "content": "Hei"}, {"role": "assistant", "content": "Hallo!"}]
+    events = []
+    models.run_turn(None, recording(), history, threading.Event(), events.append)
+    assert events[-1] == {"type": "done", "empty": True}
+    assert not any(event["type"] in {"transcript", "text", "audio"} for event in events)
+    assert len(history) == 2
     assert not models.lock.locked()
 
 
