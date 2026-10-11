@@ -245,6 +245,68 @@ def test_silence_and_inference_failure_release_model_lock():
     assert messages[0] == {"role": "system", "content": SYSTEM_PROMPT}
 
 
+@pytest.mark.parametrize(
+    "no_speech_prob,avg_logprob",
+    [(0.6, -0.2), (0.9, -0.2), (0.1, -1.01)],
+)
+def test_uncertain_audio_does_not_start_conversation(no_speech_prob, avg_logprob):
+    from types import SimpleNamespace
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+
+    class NoiseRecognizer:
+        def transcribe(self, *args, **kwargs):
+            assert kwargs["vad_filter"] is True
+            assert kwargs["vad_parameters"] == {
+                "threshold": 0.7,
+                "min_speech_duration_ms": 200,
+                "min_silence_duration_ms": 200,
+            }
+            return [
+                SimpleNamespace(
+                    text="Takk for at du så på!",
+                    no_speech_prob=no_speech_prob,
+                    avg_logprob=avg_logprob,
+                )
+            ], None
+
+    models.stt = NoiseRecognizer()
+    events = []
+    models.run_turn(None, recording(), [], threading.Event(), events.append)
+    assert events[-1] == {"type": "done", "empty": True}
+    assert not any(event["type"] in {"transcript", "text", "audio"} for event in events)
+    assert not models.lock.locked()
+
+
+def test_brief_noise_with_trailing_silence_is_rejected(monkeypatch):
+    import numpy as np
+    from faster_whisper import vad
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+
+    class NoiseRecognizer:
+        def transcribe(self, *args, **kwargs):
+            options = vad.VadOptions(**kwargs["vad_parameters"])
+            for windows, expected_speech in [(3, False), (8, True)]:
+                # Each window is 32 ms; the browser retains about 350 ms of silence.
+                probabilities = np.array([0.9] * windows + [0.1] * 11)
+                monkeypatch.setattr(vad, "get_vad_model", lambda: lambda audio: probabilities)
+                audio = np.zeros(len(probabilities) * 512, dtype=np.float32)
+                assert bool(vad.get_speech_timestamps(audio, options)) == expected_speech
+            return iter([]), None
+
+    models.stt = NoiseRecognizer()
+    history = [{"role": "user", "content": "Hei"}, {"role": "assistant", "content": "Hallo!"}]
+    events = []
+    models.run_turn(None, recording(), history, threading.Event(), events.append)
+    assert events[-1] == {"type": "done", "empty": True}
+    assert not any(event["type"] in {"transcript", "text", "audio"} for event in events)
+    assert len(history) == 2
+    assert not models.lock.locked()
+
+
 def test_system_prompt_validation_and_connection_isolation():
     models = FakeModels()
     with TestClient(create_app(models), base_url="http://127.0.0.1") as client:
@@ -895,7 +957,7 @@ def test_run_turn_branches_and_cancellation():
     class CancelRecognizer:
         def transcribe(self, *args, **kwargs):
             cancelled.set()
-            return [SimpleNamespace(text="Hei")], None
+            return [SimpleNamespace(text="Hei", no_speech_prob=0.1, avg_logprob=-0.2)], None
 
     models.stt = CancelRecognizer()
     events.clear()
@@ -1005,7 +1067,11 @@ def test_capitalize_first():
 
     class LowercaseRecognizer:
         def transcribe(self, *args, **kwargs):
-            return [SimpleNamespace(text="hva skjer i dag?")], None
+            return [
+                SimpleNamespace(text="Takk for at du så på!", no_speech_prob=0.9, avg_logprob=-0.2),
+                SimpleNamespace(text="hva skjer i dag?", no_speech_prob=0.1, avg_logprob=-1.0),
+                SimpleNamespace(text="Støy", no_speech_prob=0.1, avg_logprob=-1.01),
+            ], None
 
     models.stt = LowercaseRecognizer()
     models.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
