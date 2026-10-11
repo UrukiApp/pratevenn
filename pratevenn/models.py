@@ -676,10 +676,16 @@ class Models:
                     language="no",
                     beam_size=1,
                     vad_filter=True,
+                    vad_parameters={"threshold": 0.7, "min_speech_duration_ms": 200},
                     condition_on_previous_text=False,
                 )
                 text = capitalize_first(
-                    " ".join(segment.text.strip() for segment in segments).strip()
+                    " ".join(
+                        segment.text.strip()
+                        for segment in segments
+                        # Whisper can return confident text even when it also predicts no speech.
+                        if segment.no_speech_prob < 0.6 and segment.avg_logprob >= -1.0
+                    ).strip()
                 )
             if cancelled.is_set():
                 return

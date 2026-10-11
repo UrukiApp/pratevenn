@@ -245,6 +245,36 @@ def test_silence_and_inference_failure_release_model_lock():
     assert messages[0] == {"role": "system", "content": SYSTEM_PROMPT}
 
 
+@pytest.mark.parametrize(
+    "no_speech_prob,avg_logprob",
+    [(0.6, -0.2), (0.9, -0.2), (0.1, -1.01)],
+)
+def test_uncertain_audio_does_not_start_conversation(no_speech_prob, avg_logprob):
+    from types import SimpleNamespace
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+
+    class NoiseRecognizer:
+        def transcribe(self, *args, **kwargs):
+            assert kwargs["vad_filter"] is True
+            assert kwargs["vad_parameters"] == {"threshold": 0.7, "min_speech_duration_ms": 200}
+            return [
+                SimpleNamespace(
+                    text="Takk for at du så på!",
+                    no_speech_prob=no_speech_prob,
+                    avg_logprob=avg_logprob,
+                )
+            ], None
+
+    models.stt = NoiseRecognizer()
+    events = []
+    models.run_turn(None, recording(), [], threading.Event(), events.append)
+    assert events[-1] == {"type": "done", "empty": True}
+    assert not any(event["type"] in {"transcript", "text", "audio"} for event in events)
+    assert not models.lock.locked()
+
+
 def test_system_prompt_validation_and_connection_isolation():
     models = FakeModels()
     with TestClient(create_app(models), base_url="http://127.0.0.1") as client:
@@ -895,7 +925,7 @@ def test_run_turn_branches_and_cancellation():
     class CancelRecognizer:
         def transcribe(self, *args, **kwargs):
             cancelled.set()
-            return [SimpleNamespace(text="Hei")], None
+            return [SimpleNamespace(text="Hei", no_speech_prob=0.1, avg_logprob=-0.2)], None
 
     models.stt = CancelRecognizer()
     events.clear()
@@ -1005,7 +1035,11 @@ def test_capitalize_first():
 
     class LowercaseRecognizer:
         def transcribe(self, *args, **kwargs):
-            return [SimpleNamespace(text="hva skjer i dag?")], None
+            return [
+                SimpleNamespace(text="Takk for at du så på!", no_speech_prob=0.9, avg_logprob=-0.2),
+                SimpleNamespace(text="hva skjer i dag?", no_speech_prob=0.1, avg_logprob=-1.0),
+                SimpleNamespace(text="Støy", no_speech_prob=0.1, avg_logprob=-1.01),
+            ], None
 
     models.stt = LowercaseRecognizer()
     models.prompt = lambda *a, **kw: ([1] * 10, SimpleNamespace(stop=[], stopping_criteria=None))
