@@ -1,6 +1,6 @@
 UV          ?= uv
 MODEL_DIR   ?= .models
-CUDA        ?= $(shell if [ "$$(uname -sm)" = "Linux x86_64" ] && nvidia-smi -L >/dev/null 2>&1; then echo 1; else echo 0; fi)
+CUDA        ?= $(shell if [ "$$(uname -sm)" = "Linux x86_64" ] && nvidia-smi -L >/dev/null 2>&1 && command -v nvcc >/dev/null 2>&1; then echo 1; else echo 0; fi)
 UV_EXTRA     = --extra $(if $(filter 1,$(CUDA)),cuda,cpu) --extra dev
 
 ifeq ($(CUDA),1)
@@ -52,11 +52,17 @@ test:
 format: ## Format code
 	$(UV) run --locked $(UV_EXTRA) ruff format
 
+.PHONY: setup-hook
+setup-hook: setup-hooks ## Install Git hooks (alias for setup-hooks)
+
 .PHONY: setup-hooks
 setup-hooks: ## Install Git hooks (pre-commit and pre-push)
 	$(UV) run --locked $(UV_EXTRA) pre-commit install --hook-type pre-commit
 	$(UV) run --locked $(UV_EXTRA) pre-commit install --hook-type pre-push
 	$(UV) run --locked $(UV_EXTRA) pre-commit install-hooks
+
+.PHONY: test-hook
+test-hook: test-hooks ## Test Git hooks on all files (alias for test-hooks)
 
 .PHONY: test-hooks
 test-hooks: ## Test Git hooks on all files

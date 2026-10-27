@@ -33,12 +33,17 @@
 
           # Native wheels need runtime libraries and access to the host GPU driver.
           shellHook = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+            DRIVER_DIR="''${TMPDIR:-/tmp}/pratevenn-driver-libs"
+            mkdir -p "$DRIVER_DIR"
+            for f in /usr/lib/x86_64-linux-gnu/libcuda.so* /usr/lib/aarch64-linux-gnu/libcuda.so*; do
+              [ -e "$f" ] && ln -sf "$f" "$DRIVER_DIR/"
+            done
             export LD_LIBRARY_PATH="${
               pkgs.lib.makeLibraryPath [
                 pkgs.stdenv.cc.cc.lib
                 pkgs.zlib
               ]
-            }:/run/opengl-driver/lib:/usr/lib/x86_64-linux-gnu:/usr/lib/aarch64-linux-gnu''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            }:/run/opengl-driver/lib:$DRIVER_DIR''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           '';
         };
       });
