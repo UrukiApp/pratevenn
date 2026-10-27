@@ -120,7 +120,7 @@ check_untyped_defs = true
 warn_return_any = true
 strict_optional = true
 warn_redundant_casts = true
-exclude = "^(scripts/|tests/)"
+exclude = "^(scripts/|tests/|tmp/)"
 
 [tool.ruff]
 exclude = [
