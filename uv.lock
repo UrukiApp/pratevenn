@@ -1,14 +1,14 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <3.15"
 resolution-markers = [
     "python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda'",
-    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda'",
     "(python_full_version >= '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version >= '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
-    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
     "python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
     "python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+    "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda'",
+    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
+    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
     "python_full_version < '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
 ]
 conflicts = [[
@@ -395,7 +395,7 @@ wheels = [
 
 [package.optional-dependencies]
 toml = [
-    { name = "tomli", marker = "python_full_version <= '3.11' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "tomli", marker = "python_full_version <= '3.11'" },
 ]
 
 [[package]]
@@ -403,8 +403,8 @@ name = "ctranslate2"
 version = "4.8.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pyyaml" },
 ]
 wheels = [
@@ -488,11 +488,11 @@ wheels = [
 
 [[package]]
 name = "filelock"
-version = "4.0.8"
+version = "4.2.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cc/19/d4f21fc4b7ad098dd3c774ccb2a2929178b15d6e1a3ba7d0929817c0b30c/filelock-4.0.8.tar.gz", hash = "sha256:733d9b6b153fc63672f86104324186818b6bbe9dd7db84e9bb9887b6a04a2775", size = 249830, upload-time = "2026-10-01T06:15:21.755Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/98/771d8ca889f220d7d7e352addf500666368f0fd081c6080a83767580c6e4/filelock-4.2.1.tar.gz", hash = "sha256:c4c937ccac2a813cee448e662a56366cfb374c0f8702e75f295c412cc1c5d5a3", size = 650997, upload-time = "2026-10-17T16:48:14.435Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/6b/b45e5ad90c6ac8805b72277d75ef651bca11d3665194de7c0162bd8324eb/filelock-4.0.8-py3-none-any.whl", hash = "sha256:325ff22f358c18443b1fcdfa0a7aa3faec4b500c2807c554719da4567b533d31", size = 109665, upload-time = "2026-10-01T06:15:19.736Z" },
+    { url = "https://files.pythonhosted.org/packages/28/00/db89d339bc4ecdc8087fa7b8607ba22ffc27bf96286f340c9620bea428b3/filelock-4.2.1-py3-none-any.whl", hash = "sha256:7be2662e9e826b9bba28afc0f843a123280d799a2ea44bb5d35ccec67905ae44", size = 162455, upload-time = "2026-10-17T16:48:12.937Z" },
 ]
 
 [[package]]
@@ -659,7 +659,7 @@ dependencies = [
     { name = "click" },
     { name = "filelock" },
     { name = "fsspec" },
-    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64'" },
     { name = "httpx" },
     { name = "packaging" },
     { name = "pyyaml" },
@@ -801,17 +801,17 @@ version = "0.3.36"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "(python_full_version >= '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version >= '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
-    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
     "python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
-    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
     "python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
+    "(python_full_version < '3.12' and platform_machine != 'x86_64' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and sys_platform != 'linux' and extra != 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')",
+    "python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
     "python_full_version < '3.12' and extra != 'extra-9-pratevenn-cpu' and extra != 'extra-9-pratevenn-cuda'",
 ]
 dependencies = [
     { name = "diskcache", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
     { name = "jinja2", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine != 'x86_64') or (python_full_version < '3.12' and sys_platform != 'linux') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version < '3.12' and extra != 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine != 'x86_64') or (python_full_version >= '3.12' and sys_platform != 'linux') or (python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu') or (python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine != 'x86_64') or (python_full_version < '3.12' and sys_platform != 'linux') or (python_full_version < '3.12' and extra != 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine != 'x86_64') or (python_full_version >= '3.12' and sys_platform != 'linux') or (python_full_version >= '3.12' and extra != 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "typing-extensions", marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz", hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e", size = 76589250, upload-time = "2026-10-01T05:48:01.345Z" }
@@ -825,11 +825,11 @@ resolution-markers = [
     "python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux'",
 ]
 dependencies = [
-    { name = "diskcache", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "jinja2", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (python_full_version >= '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (python_full_version < '3.12' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "diskcache", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "jinja2", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.12' and platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
 ]
 sdist = { hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e" }
 
@@ -962,7 +962,7 @@ version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "ghp-import" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -1076,7 +1076,7 @@ version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ast-serialize" },
-    { name = "librt", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "librt", marker = "platform_python_implementation != 'PyPy'" },
     { name = "mypy-extensions" },
     { name = "pathspec" },
     { name = "typing-extensions" },
@@ -1303,8 +1303,8 @@ version = "1.30.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "flatbuffers" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "packaging" },
     { name = "protobuf" },
 ]
@@ -1447,7 +1447,7 @@ dependencies = [
     { name = "faster-whisper" },
     { name = "huggingface-hub" },
     { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "platform_machine != 'x86_64' or sys_platform != 'linux' or extra == 'extra-9-pratevenn-cpu' or extra != 'extra-9-pratevenn-cuda'" },
-    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "piper-tts" },
     { name = "uvicorn" },
     { name = "websockets" },
@@ -1459,7 +1459,7 @@ cpu = [
 ]
 cuda = [
     { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
-    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (platform_machine != 'x86_64' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda') or (sys_platform != 'linux' and extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-9-pratevenn-cuda') or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
     { name = "nvidia-cublas-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
@@ -1691,7 +1691,7 @@ name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
@@ -1862,7 +1862,7 @@ version = "1.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/7b/2b/3850dc6bf7ef71b088962eba31dafc6cffd2f96e577ebb0bb316df96da3e/starlette-1.7.0.tar.gz", hash = "sha256:c79f74ea63cff761804fbbfb182f1e0b440c2d07b164d24700c5a1bab5d6ff5d", size = 2736246, upload-time = "2026-09-23T07:30:26.35Z" }
 wheels = [
@@ -1955,7 +1955,7 @@ name = "tqdm"
 version = "4.70.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-9-pratevenn-cpu' and extra == 'extra-9-pratevenn-cuda')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0d/ea/b2a5bd54b28a324dae8211928b2d730b6547500342c7e6c6dea08bd0a485/tqdm-4.70.1.tar.gz", hash = "sha256:cefd0eca11b2a37a3aee776544d4f4ae913f02688135b5556b8788dfa474afc4", size = 171846, upload-time = "2026-09-11T07:25:16.601Z" }
 wheels = [
