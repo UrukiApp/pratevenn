@@ -15,7 +15,7 @@ MESSAGES = [
     {"role": "assistant", "content": "Hei!", "source": "text"},
 ]
 STATUS = {
-    "version": "0.1.0a7",
+    "version": "0.1.0a8",
     "models": {kind: [{"id": kind, "label": kind}] for kind in ("stt", "llm", "tts")},
     "selected": {kind: kind for kind in ("stt", "llm", "tts")},
     "llm_device": "CPU",
