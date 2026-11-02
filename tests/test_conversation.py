@@ -543,6 +543,59 @@ def test_model_reuse_replacement_and_failed_load(monkeypatch, supported, gpu_lay
     assert bytes(tokens).decode() == formatted.prompt == "False:Snakk om mat.:Hei"
 
 
+@pytest.mark.parametrize("context_tokens, retained", [(8192, 16), (1024, 14)])
+def test_turn_keeps_history_until_token_budget_is_full(context_tokens, retained):
+    from types import SimpleNamespace
+
+    models = Models.__new__(Models)
+    models.lock = threading.Lock()
+    models.context_tokens = context_tokens
+    formatted_messages = []
+
+    def formatter(messages, enable_thinking):
+        formatted_messages.append(messages)
+        return SimpleNamespace(
+            prompt="x" * (len(messages) * 25),
+            added_special=False,
+            stop=[],
+            stopping_criteria=None,
+        )
+
+    def complete(tokens, **kwargs):
+        assert len(tokens) <= models.prompt_tokens
+        return iter([{"choices": [{"text": "Hei!"}]}])
+
+    models.formatter = formatter
+    models.llm = SimpleNamespace(
+        tokenize=lambda text, **kwargs: list(text),
+        create_completion=complete,
+        n_tokens=405,
+    )
+    models.speak = lambda text, **kwargs: recording()
+    history = [
+        {"role": role, "content": f"{role} {turn}"}
+        for turn in range(8)
+        for role in ("user", "assistant")
+    ]
+    original = history[:]
+    events = []
+    models.run_turn("Hei igjen", None, history, threading.Event(), events.append)
+
+    assert formatted_messages[0] == chat_messages(original, "Hei igjen")
+    assert formatted_messages[-1] == chat_messages(original[-retained:], "Hei igjen")
+    assert history == [
+        *original[-retained:],
+        {"role": "user", "content": "Hei igjen"},
+        {"role": "assistant", "content": "Hei!"},
+    ]
+    assert all(
+        event["omitted"] == 16 - retained
+        for event in events if event["type"] == "context"
+    )
+    assert events[-1]["type"] == "done"
+    assert not models.lock.locked()
+
+
 def test_turn_keeps_custom_prompt_when_trimming_history():
     from types import SimpleNamespace
 

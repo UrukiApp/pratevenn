@@ -699,7 +699,7 @@ class Models:
             text = text[:1000]
             emit({"type": "transcript", "text": text})
             emit({"type": "status", "message": "Thinking …"})
-            recent = history[-12:]
+            recent = history[:]
             tokens, formatted = self.prompt(recent, text, system_prompt)
             while len(tokens) > self.prompt_tokens and recent:
                 recent = recent[2:]
